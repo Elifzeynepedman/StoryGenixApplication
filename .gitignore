@@ -1,0 +1,12 @@
+# Xcode and macOS
+*.mp4
+*.mov
+*.psd
+*.avi
+*.zip
+.DS_Store
+xcuserdata/
+*.xcuserstate
+DerivedData/
+build/
+

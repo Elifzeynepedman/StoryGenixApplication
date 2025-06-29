@@ -1,0 +1,21 @@
+{
+  "images" : [
+    {
+      "filename" : "Leonardo_Phoenix_10_A_serene_and_majestic_illustration_of_the_0-2.jpg",
+      "idiom" : "universal",
+      "scale" : "1x"
+    },
+    {
+      "idiom" : "universal",
+      "scale" : "2x"
+    },
+    {
+      "idiom" : "universal",
+      "scale" : "3x"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
