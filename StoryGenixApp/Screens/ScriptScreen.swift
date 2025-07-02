@@ -38,15 +38,24 @@ struct ScriptScreen: View {
                     .padding(.horizontal, 20)
 
                 ZStack(alignment: .topLeading) {
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(Color("DarkText"))
+                    ZStack(alignment: .topLeading) {
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color("DarkText"))
 
-                    TextEditor(text: useAIGeneration ? $aiScriptText : $customScriptText)
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.white)
-                        .scrollContentBackground(.hidden)
-                        .disabled(useAIGeneration)
-                        .padding(20)
+                        if !useAIGeneration && customScriptText.isEmpty {
+                            Text("Write your script here...")
+                                .foregroundColor(.white.opacity(0.5))
+                                .padding(24)
+                                .font(.system(size: 16, weight: .medium))
+                        }
+
+                        TextEditor(text: useAIGeneration ? $aiScriptText : $customScriptText)
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.white)
+                            .scrollContentBackground(.hidden)
+                            .disabled(useAIGeneration)
+                            .padding(20)
+                    }
                 }
                 .frame(height: 350)
                 .clipShape(RoundedRectangle(cornerRadius: 16))
@@ -101,6 +110,5 @@ struct ScriptScreen: View {
 
 #Preview {
     ScriptScreen(topic: "How eyes work")
-      .withRouter()
 }
 

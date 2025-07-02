@@ -6,38 +6,42 @@
 //
 
 import Foundation
+import Combine
 
 class VideoPreviewViewModel: ObservableObject {
     @Published var scenes: [VideoScene] = []
-    @Published var currentSceneIndex: Int = 0
+    @Published var currentSceneIndex = 0
+    @Published var isLoading = false
 
-    var currentScene: VideoScene? {
-        guard scenes.indices.contains(currentSceneIndex) else { return nil }
-        return scenes[currentSceneIndex]
-    }
+    func loadScenes(from script: String) {
+        let lines = script
+            .components(separatedBy: .newlines)
+            .filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
 
-    // Computed property for UI clarity
-    var isOnLastScene: Bool {
-        currentSceneIndex == scenes.count - 1
-    }
-
-    init() {
-        let url = Bundle.main.url(forResource: "EfesVideo", withExtension: "mp4")
-        for idx in 0..<6 {
-            scenes.append(VideoScene(index: idx, videoURL: url, previewImage: "CyberCat"))
+        self.scenes = lines.map {
+            VideoScene(sceneText: $0, prompt: $0, videoURL: nil, previewImage: "PlaceholderImage")
         }
+        self.currentSceneIndex = 0
     }
 
-    func nextScene() {
-        if currentSceneIndex < scenes.count - 1 {
-            currentSceneIndex += 1
-        }
+    func updatePrompt(for index: Int, newPrompt: String) {
+        guard scenes.indices.contains(index) else { return }
+        scenes[index].prompt = newPrompt
     }
 
-    func prevScene() {
-        if currentSceneIndex > 0 {
-            currentSceneIndex -= 1
+    func generateVideo(for index: Int) {
+        guard scenes.indices.contains(index) else { return }
+        isLoading = true
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            if let path = Bundle.main.path(forResource: "EfesVideo", ofType: "mp4") {
+                let url = URL(fileURLWithPath: path)
+                self.scenes[index].videoURL = url
+                print("✅ Video generated for scene \(index)")
+            } else {
+                print("❌ Efes.mp4 not found in bundle.")
+            }
+            self.isLoading = false
         }
     }
 }
-

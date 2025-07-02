@@ -9,7 +9,8 @@ import Foundation
 
 struct VideoScene: Identifiable {
     let id = UUID()
-    let index: Int
-    let videoURL: URL?
-    let previewImage: String 
+    var sceneText: String       // original script line
+    var prompt: String          // editable Leonardo prompt
+    var videoURL: URL?          // generated video (optional until generation)
+    var previewImage: String    // placeholder before video
 }

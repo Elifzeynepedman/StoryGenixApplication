@@ -18,8 +18,10 @@ struct SecondaryActionButton: View {
                 .foregroundColor(.white)
                 .frame(height: 44)
                 .frame(maxWidth: .infinity)
-                .background(Color("Dark Text"))
+                .background(Color("DarkText"))
         }
         .clipShape(RoundedRectangle(cornerRadius: 14))
+        .padding(.horizontal ,40)
+
     }
 }

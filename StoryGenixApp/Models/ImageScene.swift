@@ -7,9 +7,10 @@
 
 import Foundation
 
-struct ImageScene: Identifiable {
+struct ImageScene: Identifiable{
     let id = UUID()
     let sceneText: String
-    var generatedImages: [String] = []
+    var prompt: String // 🆕 editable Leonardo prompt
+    var generatedImages: [String] = [] // still using String for image ID or name
     var selectedImage: String? = nil
 }

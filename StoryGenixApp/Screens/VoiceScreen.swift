@@ -51,7 +51,7 @@ struct VoiceScreen: View {
     var headerSection: some View {
         VStack(spacing: 8) {
             Spacer().frame(height: 16)
-            Text("VidGenius")
+            Text("StoryGenix")
                 .font(.system(size: 24, weight: .bold))
                 .foregroundStyle(.white)
             Text("Choose Your Voice")

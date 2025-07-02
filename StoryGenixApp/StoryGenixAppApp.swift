@@ -11,7 +11,8 @@ import SwiftUI
 struct StoryGenixAppApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView().withRouter()
+            MainTabView()
         }
     }
 }
+
