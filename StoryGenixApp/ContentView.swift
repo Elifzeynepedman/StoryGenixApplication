@@ -58,7 +58,7 @@ struct ContentView: View {
                         .fixedSize(horizontal: false, vertical: true)
 
                     Spacer()
-
+                    
                     // Input + Mic Button
                     HStack(alignment: .top, spacing: 8) {
                         ZStack(alignment: .topLeading) {

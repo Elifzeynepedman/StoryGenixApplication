@@ -9,7 +9,8 @@ import AVFoundation
 
 struct VoiceScreen: View {
     let script: String
-
+    let topic: String
+    
     @State private var selectedGender = "Female"
     @State private var selectedVoice = "Jennie"
     @State private var isGenerating = false
@@ -124,7 +125,7 @@ struct VoiceScreen: View {
             .frame(maxWidth: 350)
             
             SecondaryActionButton(title: "Continue to Images") {
-                router.goToImages(script: script)
+                router.goToImages(script: script, topic: topic)
             }
 
             PlainTextButton(title: "Regenrate Voice", action: generateVoice)
@@ -145,6 +146,7 @@ struct VoiceScreen: View {
 
 #Preview {
     VoiceScreen(
-        script: "This is the sample script that will be generated and bla bla bla bla bla.")
-        .withRouter()
+        script: "This is the sample script that will be generated and bla bla bla bla bla.",
+        topic: "How Eyes Work"
+    ).withRouter()
 }

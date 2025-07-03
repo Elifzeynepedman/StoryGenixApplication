@@ -10,6 +10,7 @@ import SwiftUI
 struct MainTabView: View {
     @State private var selectedTab = 0
     @State private var router = Router()
+    @StateObject private var projectViewModel = ProjectsViewModel()
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -17,9 +18,11 @@ struct MainTabView: View {
             NavigationStack(path: $router.path) {
                 ContentView()
                     .environment(router)
+                    .environmentObject(projectViewModel)
                     .navigationDestination(for: Route.self) { route in
                         routeView(for: route)
-                            .environment(router) 
+                            .environment(router)
+                            .environmentObject(projectViewModel)
                     }
             }
             .tabItem {
@@ -30,6 +33,7 @@ struct MainTabView: View {
             // Projects Tab
             NavigationStack {
                 ProjectsScreen()
+                    .environmentObject(projectViewModel)
             }
             .tabItem {
                 Label("Projects", systemImage: "folder.fill")
@@ -51,17 +55,17 @@ struct MainTabView: View {
     private func routeView(for route: Route) -> some View {
         switch route {
         case .home:
-            EmptyView()
+            ContentView()
         case .script(let topic):
             ScriptScreen(topic: topic)
-        case .voice(let script):
-            VoiceScreen(script: script)
-        case .images(let script):
-            ImageScreen(script: script)
-        case .videopreview(let script):
-            VideoPreviewScreen(script: script)
-        case .videocomplete:
-            VideoCompleteScreen()
+        case .voice(let script, let topic):
+            VoiceScreen(script: script, topic: topic)
+        case .images(let script, let topic):
+            ImageScreen(script: script, topic: topic)
+        case .videopreview(let script, let topic):
+            VideoPreviewScreen(script: script, topic: topic)
+        case .videocomplete(let project):
+            VideoCompleteScreen(project: project)
         }
     }
 }

@@ -7,10 +7,24 @@
 
 import Foundation
 
-struct VideoScene: Identifiable {
-    let id = UUID()
-    var sceneText: String       // original script line
-    var prompt: String          // editable Leonardo prompt
-    var videoURL: URL?          // generated video (optional until generation)
-    var previewImage: String    // placeholder before video
+struct VideoScene: Identifiable, Codable, Hashable {
+    let id: UUID
+    var sceneText: String
+    var prompt: String
+    var videoURL: URL?
+    var previewImage: String
+
+    init(
+        id: UUID = UUID(),
+        sceneText: String,
+        prompt: String,
+        videoURL: URL? = nil,
+        previewImage: String
+    ) {
+        self.id = id
+        self.sceneText = sceneText
+        self.prompt = prompt
+        self.videoURL = videoURL
+        self.previewImage = previewImage
+    }
 }

@@ -11,24 +11,34 @@ import Observation
 enum Route: Hashable {
     case home
     case script(topic: String)
-    case voice(script: String)
-    case images(script: String)
-    case videopreview(script: String)
-    case videocomplete
-
-
+    case voice(script: String, topic: String)
+    case images(script: String, topic: String)
+    case videopreview(script: String, topic: String)
+    case videocomplete(project: VideoProject)
 }
 
 @Observable
 class Router {
     var path = NavigationPath()
+    
     func goToHome() {
-        path = NavigationPath() // this triggers showing ContentView directly
+        path = NavigationPath()
     }
-    func goToScript(topic: String) { path.append(Route.script(topic: topic)) }
-    func goToVoice(script: String) { path.append(Route.voice(script: script)) }
-    func goToImages(script: String) { path.append(Route.images(script: script)) }
-    func goToVideoPreview(script: String) { path.append(Route.videopreview(script: script)) }
-    func goToVideoComplete() { path.append(Route.videocomplete) }
+    func goToScript(topic: String) {
+        path.append(Route.script(topic: topic))
+    }
+    func goToVoice(script: String, topic: String) {
+        path.append(Route.voice(script: script, topic: topic))
+    }
+    func goToImages(script: String, topic: String) {
+        path.append(Route.images(script: script, topic: topic))
+    }
+    func goToVideoPreview(script: String, topic: String) {
+        path.append(Route.videopreview(script: script, topic: topic))
+    }
+    func goToVideoComplete(project: VideoProject) {
+        path.append(Route.videocomplete(project: project))
+    }
+
 
 }

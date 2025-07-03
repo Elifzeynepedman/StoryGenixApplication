@@ -7,17 +7,29 @@
 
 import Foundation
 
-struct VideoProject: Identifiable, Codable, Equatable {
+struct VideoProject: Identifiable, Codable, Hashable {
     let id: UUID
     var title: String
-    var thumbnail: String // image asset name or local path
+    var script: String
+    var thumbnail: String
+    var scenes: [VideoScene]
     var isCompleted: Bool
-    var progressStep: Int // 0 to 4
+    var progressStep: Int
 
-    init(id: UUID = UUID(), title: String, thumbnail: String, isCompleted: Bool, progressStep: Int) {
+    init(
+        id: UUID = UUID(),
+        title: String,
+        script: String = "",
+        thumbnail: String,
+        scenes: [VideoScene] = [],
+        isCompleted: Bool,
+        progressStep: Int
+    ) {
         self.id = id
         self.title = title
+        self.script = script
         self.thumbnail = thumbnail
+        self.scenes = scenes
         self.isCompleted = isCompleted
         self.progressStep = progressStep
     }

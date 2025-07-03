@@ -4,25 +4,57 @@
 //
 //  Created by Elif Edman on 2.07.2025.
 //
+//
+//  ProjectsViewModel.swift
+//  StoryGenix
+//
+//  Created by Elif Edman on 2.07.2025.
+//
 
 import Foundation
-import SwiftUI
 
 class ProjectsViewModel: ObservableObject {
     @Published var allProjects: [VideoProject] = []
 
     init() {
-        loadMockProjects()
+        allProjects = ProjectStorageManager.load()
     }
 
-    func loadMockProjects() {
-        allProjects = [
-            VideoProject(title: "The Apple Kid", thumbnail: "Thumbnail1", isCompleted: false, progressStep: 2),
-            VideoProject(title: "The Birth of Venus", thumbnail: "Thumbnail2", isCompleted: true, progressStep: 4)
-        ]
+    func addProject(_ project: VideoProject) {
+        allProjects.append(project)
+        ProjectStorageManager.save(allProjects)
+    }
+
+    func updateProject(_ updated: VideoProject) {
+        if let index = allProjects.firstIndex(where: { $0.id == updated.id }) {
+            allProjects[index] = updated
+            ProjectStorageManager.save(allProjects)
+        }
     }
 
     func deleteProject(_ project: VideoProject) {
         allProjects.removeAll { $0.id == project.id }
+        ProjectStorageManager.save(allProjects)
+    }
+
+    func shareProject(_ project: VideoProject) {
+        print("Sharing: \(project.title)")
+    }
+
+    func resumeProject(_ project: VideoProject) {
+        print("Resuming: \(project.title)")
+    }
+
+    func openCompletedProject(_ project: VideoProject) {
+        print("Opening completed project: \(project.title)")
+    }
+
+    /// ✅ Replaces any unfinished draft (by same title or ID) with completed version
+    func replaceWithCompleted(_ completed: VideoProject) {
+        allProjects.removeAll {
+            $0.id == completed.id || ($0.title == completed.title && !$0.isCompleted)
+        }
+        allProjects.append(completed)
+        ProjectStorageManager.save(allProjects)
     }
 }

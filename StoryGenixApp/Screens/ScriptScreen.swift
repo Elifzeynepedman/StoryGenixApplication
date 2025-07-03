@@ -62,7 +62,7 @@ struct ScriptScreen: View {
                 .padding(.horizontal, 20)
 
                 SecondaryActionButton(title: "Continue to Images") {
-                    router.goToVoice(script: currentScript)
+                    router.goToVoice(script: currentScript, topic: topic)
                 }
 
                 if useAIGeneration {
@@ -109,6 +109,6 @@ struct ScriptScreen: View {
 }
 
 #Preview {
-    ScriptScreen(topic: "How eyes work")
+    ScriptScreen(topic: "How eyes work").withRouter()
 }
 

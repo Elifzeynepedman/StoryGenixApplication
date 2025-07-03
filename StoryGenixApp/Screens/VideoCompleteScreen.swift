@@ -9,18 +9,18 @@ import SwiftUI
 import AVKit
 
 struct VideoCompleteScreen: View {
+    let project: VideoProject
+
+    @EnvironmentObject private var viewModel: ProjectsViewModel
+    @Environment(Router.self) private var router
+
     private let videoURL = Bundle.main.url(forResource: "EfesVideo", withExtension: "mp4")
     @State private var player: AVPlayer = AVPlayer()
     @State private var isSharing = false
     @State private var showDownloadSuccess = false
-    
-    @Environment(Router.self) private var router
-
-    
-
 
     var body: some View {
-        ZStack {
+        ZStack(alignment: .top) {
             Image("BackgroundImage")
                 .resizable()
                 .scaledToFill()
@@ -44,7 +44,9 @@ struct VideoCompleteScreen: View {
                     VideoPlayer(player: player)
                         .onAppear {
                             player.replaceCurrentItem(with: AVPlayerItem(url: url))
-                            player.play()
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                player.play()
+                            }
                         }
                         .frame(width: 320, height: 320)
                         .cornerRadius(18)
@@ -64,10 +66,14 @@ struct VideoCompleteScreen: View {
                         if let url = videoURL {
                             MediaSaver.saveVideoToPhotoLibrary(from: url) { success in
                                 if success {
-                                    print("Video saved successfully.")
-                                    // Optional: Show confirmation toast
-                                } else {
-                                    print("Failed to save video.")
+                                    withAnimation {
+                                        showDownloadSuccess = true
+                                    }
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                        withAnimation {
+                                            showDownloadSuccess = false
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -85,12 +91,17 @@ struct VideoCompleteScreen: View {
                             )
                     }
 
-                    PrimaryGradientButton(title: "Share Video", isLoading: false){
-                       isSharing = true
+                    PrimaryGradientButton(title: "Share Video", isLoading: false) {
+                        isSharing = true
                     }
 
                     Button(action: {
-                        // Navigate back to home
+                        var updated = project
+                        updated.isCompleted = true
+                        updated.progressStep = 4
+
+                        viewModel.replaceWithCompleted(updated) // ✅ cleans up old unfinished version
+
                         router.goToHome()
                     }) {
                         Text("Return to Home")
@@ -103,6 +114,18 @@ struct VideoCompleteScreen: View {
                 Spacer()
             }
             .padding(.top, 30)
+
+            if showDownloadSuccess {
+                Text("✅ Video successfully downloaded")
+                    .font(.callout.bold())
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(Color("DarkText").opacity(0.85))
+                    .clipShape(Capsule())
+                    .padding(.top, 20)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+            }
         }
         .navigationBarBackButtonHidden(true)
         .sheet(isPresented: $isSharing) {
@@ -110,11 +133,18 @@ struct VideoCompleteScreen: View {
                 ShareSheetView(items: [url])
             }
         }
-
     }
 }
 
-// MARK: - Preview
 #Preview {
-    VideoCompleteScreen()
+    VideoCompleteScreen(project: VideoProject(
+        title: "Sample Project",
+        script: "The eye sees the world.",
+        thumbnail: "sampleThumbnail",
+        scenes: [],
+        isCompleted: false,
+        progressStep: 3
+    ))
+    .environment(Router())
+    .environmentObject(ProjectsViewModel())
 }

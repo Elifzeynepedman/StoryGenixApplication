@@ -1,18 +1,15 @@
-//
-//  ImageScreen.swift
-//  StoryGenix
-//
-//  Created by Elif Edman on 29.06.2025.
-//
-
 import SwiftUI
 
 struct ImageScreen: View {
     let script: String
+    let topic: String
 
     @StateObject private var viewModel = ImageViewModel()
     @State private var showSelectionWarning = false
+    @State private var projectID = UUID()
+
     @Environment(Router.self) private var router
+    @EnvironmentObject private var projectViewModel: ProjectsViewModel
 
     var body: some View {
         ZStack {
@@ -22,7 +19,6 @@ struct ImageScreen: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 20) {
-                // Fixed Header
                 Text("StoryGenix")
                     .font(.system(size: 24, weight: .bold))
                     .foregroundColor(.white)
@@ -31,7 +27,6 @@ struct ImageScreen: View {
                     .font(.system(size: 28, weight: .bold))
                     .foregroundColor(.white)
 
-                // Scrollable content
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 20) {
                         SegmentedToggle(
@@ -40,11 +35,9 @@ struct ImageScreen: View {
                         )
                         .padding(.horizontal, 35)
 
-                        // Safely unwrap current scene
                         if viewModel.scenes.indices.contains(viewModel.currentSceneIndex) {
                             let currentScene = viewModel.scenes[viewModel.currentSceneIndex]
 
-                            // Prompt & Generate button section
                             ScriptPromptSection(
                                 sceneText: currentScene.sceneText,
                                 prompt: currentScene.prompt,
@@ -64,13 +57,9 @@ struct ImageScreen: View {
                                 },
                                 onNext: {
                                     if currentScene.selectedImage == nil {
-                                        withAnimation {
-                                            showSelectionWarning = true
-                                        }
+                                        withAnimation { showSelectionWarning = true }
                                         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                            withAnimation {
-                                                showSelectionWarning = false
-                                            }
+                                            withAnimation { showSelectionWarning = false }
                                         }
                                     } else if viewModel.currentSceneIndex < viewModel.scenes.count - 1 {
                                         viewModel.currentSceneIndex += 1
@@ -83,7 +72,6 @@ struct ImageScreen: View {
                                 generateButtonTitle: "Generate Images"
                             )
 
-                            // Warning if user tries to proceed without selecting an image
                             if showSelectionWarning {
                                 Text("Please select an image before continuing.")
                                     .font(.system(size: 14, weight: .bold))
@@ -92,7 +80,6 @@ struct ImageScreen: View {
                                     .padding(.top, -6)
                             }
 
-                            // Show images grid only if images are generated
                             if !currentScene.generatedImages.isEmpty {
                                 LazyVGrid(columns: [GridItem(), GridItem()], spacing: 16) {
                                     ForEach(currentScene.generatedImages, id: \.self) { imageName in
@@ -118,7 +105,6 @@ struct ImageScreen: View {
                                 }
                                 .padding(.horizontal, 30)
 
-                                // Navigation buttons below images
                                 HStack {
                                     Button("← Previous") {
                                         if viewModel.currentSceneIndex > 0 {
@@ -132,13 +118,9 @@ struct ImageScreen: View {
 
                                     Button("Next →") {
                                         if currentScene.selectedImage == nil {
-                                            withAnimation {
-                                                showSelectionWarning = true
-                                            }
+                                            withAnimation { showSelectionWarning = true }
                                             DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                                withAnimation {
-                                                    showSelectionWarning = false
-                                                }
+                                                withAnimation { showSelectionWarning = false }
                                             }
                                         } else if viewModel.currentSceneIndex < viewModel.scenes.count - 1 {
                                             viewModel.currentSceneIndex += 1
@@ -149,15 +131,13 @@ struct ImageScreen: View {
                                 .padding(.horizontal, 40)
                                 .foregroundColor(.white)
 
-                                // Show "Continue to Videos" only on last scene
                                 if viewModel.currentSceneIndex == viewModel.scenes.count - 1 {
                                     SecondaryActionButton(title: "Continue to Videos") {
-                                        router.goToVideoPreview(script:script)
+                                        router.goToVideoPreview(script: script, topic: topic)
                                     }
                                     .padding(.horizontal, 30)
                                 }
 
-                                // Regenerate Images button always shown below images
                                 Button("Regenerate Images") {
                                     viewModel.generateImages(for: viewModel.currentSceneIndex)
                                 }
@@ -172,15 +152,30 @@ struct ImageScreen: View {
         }
         .onAppear {
             viewModel.loadScenes(from: script)
+
+            let draft = VideoProject(
+                id: projectID,
+                title: topic,
+                script: script,
+                thumbnail: viewModel.scenes.first?.selectedImage ?? "defaultThumbnail",
+                scenes: viewModel.scenes.map {
+                    VideoScene(
+                        id: $0.id,
+                        sceneText: $0.sceneText,
+                        prompt: $0.prompt,
+                        videoURL: nil,
+                        previewImage: $0.selectedImage ?? "defaultThumbnail"
+                    )
+                },
+                isCompleted: false,
+                progressStep: 2
+            )
+
+            if let index = projectViewModel.allProjects.firstIndex(where: { $0.id == draft.id }) {
+                projectViewModel.updateProject(draft)
+            } else {
+                projectViewModel.addProject(draft)
+            }
         }
     }
-}
-
-// MARK: - Preview
-#Preview {
-    ImageScreen(script: """
-    The human eye is one of the most extraordinary organs in the body.
-    It captures light, interprets color, and helps us understand the world around us.
-    Behind every blink is a complex system — the cornea, lens, and retina all working together like a perfect machine.
-    """)
 }

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ProjectsScreen: View {
-    @StateObject private var viewModel = ProjectsViewModel()
+    @EnvironmentObject var viewModel: ProjectsViewModel
 
     private var unfinishedProjects: [VideoProject] {
         viewModel.allProjects.filter { !$0.isCompleted }
@@ -20,15 +20,12 @@ struct ProjectsScreen: View {
 
     var body: some View {
         ZStack {
-            // Background only
             Image("BackgroundImage")
                 .resizable()
                 .scaledToFill()
                 .ignoresSafeArea()
 
-            // Foreground content
             VStack(spacing: 20) {
-                // Header on top
                 Text("StoryGenix")
                     .font(.system(size: 24, weight: .bold))
                     .foregroundColor(.white)
@@ -56,7 +53,7 @@ struct ProjectsScreen: View {
                                     UnfinishedProjectCard(project: project, onDelete: {
                                         viewModel.deleteProject(project)
                                     })
-                                    .padding(.horizontal,40)
+                                    .padding(.horizontal, 40)
                                 }
                             }
 
@@ -70,7 +67,7 @@ struct ProjectsScreen: View {
                                     CompletedProjectCard(project: project)
                                 }
                             }
-                            .padding(.horizontal,50)
+                            .padding(.horizontal, 50)
                         }
                         .padding(.vertical)
                     }
@@ -85,4 +82,5 @@ struct ProjectsScreen: View {
 
 #Preview {
     ProjectsScreen()
+        .environmentObject(ProjectsViewModel())
 }

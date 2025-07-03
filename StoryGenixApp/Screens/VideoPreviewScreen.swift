@@ -1,17 +1,18 @@
-// VideoPreviewScreen.swift
-// StoryGenixApp
-
 import SwiftUI
 import AVKit
 import Combine
 
 struct VideoPreviewScreen: View {
     let script: String
+    let topic: String
 
     @StateObject private var viewModel = VideoPreviewViewModel()
     @State private var player = AVPlayer()
     @State private var showSelectionWarning = false
+    @State private var projectID = UUID()
+
     @Environment(Router.self) private var router
+    @EnvironmentObject private var projectViewModel: ProjectsViewModel
 
     var body: some View {
         ZStack {
@@ -123,7 +124,22 @@ struct VideoPreviewScreen: View {
 
                                 if viewModel.currentSceneIndex == viewModel.scenes.count - 1 {
                                     SecondaryActionButton(title: "Continue to Final") {
-                                         router.goToVideoComplete()
+                                        let project = VideoProject(
+                                            title: topic,
+                                            script: script,
+                                            thumbnail: viewModel.scenes.first?.previewImage ?? "defaultThumbnail",
+                                            scenes: viewModel.scenes,
+                                            isCompleted: false,
+                                            progressStep: 3
+                                        )
+
+                                        if !projectViewModel.allProjects.contains(where: { $0.id == project.id }) {
+                                            projectViewModel.addProject(project)
+                                        } else {
+                                            projectViewModel.updateProject(project)
+                                        }
+
+                                        router.goToVideoComplete(project: project)
                                     }
                                     .padding(.horizontal, 30)
                                 }
@@ -142,15 +158,37 @@ struct VideoPreviewScreen: View {
         }
         .onAppear {
             viewModel.loadScenes(from: script)
+
+            // Save as unfinished draft
+            let draft = VideoProject(
+                id: projectID, // use persistent ID
+                title: topic,
+                script: script,
+                thumbnail: viewModel.scenes.first?.previewImage ?? "defaultThumbnail",
+                scenes: viewModel.scenes,
+                isCompleted: false,
+                progressStep: 3
+            )
+
+            if let index = projectViewModel.allProjects.firstIndex(where: { $0.title == draft.title && !$0.isCompleted }) {
+                projectViewModel.updateProject(draft)
+            } else {
+                projectViewModel.addProject(draft)
+            }
         }
     }
 }
 
 #Preview {
-    VideoPreviewScreen(script: """
-    The human eye is one of the most extraordinary organs in the body.
-    It captures light, interprets color, and helps us understand the world around us.
+    VideoPreviewScreen(
+        script: """
+        The human eye is one of the most extraordinary organs in the body.
+        It captures light, interprets color, and helps us understand the world around us.
 
-    Behind every blink is a complex system — the cornea, lens, and retina all working together like a perfect machine.
-    """)
+        Behind every blink is a complex system — the cornea, lens, and retina all working together like a perfect machine.
+        """,
+        topic: "How Eyes Work"
+    )
+    .environment(Router())
+    .environmentObject(ProjectsViewModel())
 }

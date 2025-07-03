@@ -4,12 +4,18 @@
 //
 //  Created by Elif Edman on 29.06.2025.
 //
+//
+//  RouterViewModifier.swift
+//  StoryGenixApp
+//
+//  Created by Elif Edman on 29.06.2025.
+//
 
 import SwiftUI
 import Foundation
 
 struct RouterViewModifier: ViewModifier {
-   @State private var router = Router()
+    @State private var router = Router()
     @State private var selectedTab = 0
 
     func body(content: Content) -> some View {
@@ -39,13 +45,13 @@ struct RouterViewModifier: ViewModifier {
                     content
                 }
             }
-            .environment(router)
             .navigationDestination(for: Route.self) { route in
                 routeView(for: route)
             }
         }
+        .environment(router) // ✅ Correctly applies the router environment here
     }
-    
+
     @ViewBuilder
     private func tabContent(for index: Int) -> some View {
         switch index {
@@ -59,28 +65,24 @@ struct RouterViewModifier: ViewModifier {
             EmptyView()
         }
     }
-    
-    // Handles all navigation destinations in one place
-    private func routeView(for route: Route) -> some View {
-        Group {
-            switch route {
-            case .home:
-                ContentView()
-            case .script(let topic):
-                ScriptScreen(topic: topic)
-            case .voice(let script):
-                VoiceScreen(script: script)
-            case .images(let script):
-               ImageScreen(script: script)
-            case .videopreview(let script):
-                VideoPreviewScreen(script: script)
-            case .videocomplete:
-                VideoCompleteScreen()
-            }
-        }
-        .environment(router)
-    }
 
+    @ViewBuilder
+    private func routeView(for route: Route) -> some View {
+        switch route {
+        case .home:
+            ContentView()
+        case .script(let topic):
+            ScriptScreen(topic: topic)
+        case .voice(let script, let topic):
+            VoiceScreen(script: script, topic: topic)
+        case .images(let script, let topic):
+            ImageScreen(script: script, topic: topic)
+        case .videopreview(let script, let topic):
+            VideoPreviewScreen(script: script, topic: topic)
+        case .videocomplete(let project):
+            VideoCompleteScreen(project: project)
+        }
+    }
 }
 
 extension View {
