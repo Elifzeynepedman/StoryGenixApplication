@@ -9,6 +9,10 @@ import SwiftUI
 
 struct CompletedProjectCard: View {
     let project: VideoProject
+    let onDelete: () -> Void
+
+    @State private var isViewPressed = false
+    @State private var isDeletePressed = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -25,20 +29,53 @@ struct CompletedProjectCard: View {
 
             HStack {
                 Button(action: {
-                    print("Share \(project.title)")
+                    isViewPressed = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                        isViewPressed = false
+                        print("Share \(project.title)")
+                    }
                 }) {
-                    Image(systemName: "square.and.arrow.up")
+                    Text("View")
+                        .font(.subheadline)
                         .foregroundColor(.white)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(isViewPressed ? Color.white.opacity(0.2) : Color.clear)
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.white, lineWidth: 1)
+                        )
+                        .animation(.easeInOut(duration: 0.2), value: isViewPressed)
                 }
 
                 Spacer()
 
                 Button(action: {
-                    print("View \(project.title)")
+                    isDeletePressed = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                        isDeletePressed = false
+                        onDelete() // ✅ actually perform delete
+                    }
                 }) {
-                    Image(systemName: "play.rectangle.fill")
+                    Text("Delete")
+                        .font(.subheadline)
                         .foregroundColor(.white)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(isDeletePressed ? Color.white.opacity(0.2) : Color.clear)
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.white, lineWidth: 1)
+                        )
+                        .animation(.easeInOut(duration: 0.2), value: isDeletePressed)
                 }
+
             }
         }
         .padding()

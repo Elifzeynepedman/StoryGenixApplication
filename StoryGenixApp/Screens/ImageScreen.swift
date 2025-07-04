@@ -69,7 +69,7 @@ struct ImageScreen: View {
                                 canGoNext: viewModel.currentSceneIndex < viewModel.scenes.count - 1,
                                 isLoading: viewModel.isLoading,
                                 shouldShowNavigation: !currentScene.generatedImages.isEmpty,
-                                generateButtonTitle: "Generate Images"
+                                generateButtonTitle: currentScene.generatedImages.isEmpty ? "Generate Images" : "Regenerate Images"
                             )
 
                             if showSelectionWarning {
@@ -133,15 +133,10 @@ struct ImageScreen: View {
 
                                 if viewModel.currentSceneIndex == viewModel.scenes.count - 1 {
                                     SecondaryActionButton(title: "Continue to Videos") {
-                                        router.goToVideoPreview(script: script, topic: topic)
+                                        router.goToVideoPreview(script: script, topic: topic, projectID: projectID)
                                     }
                                     .padding(.horizontal, 30)
                                 }
-
-                                Button("Regenerate Images") {
-                                    viewModel.generateImages(for: viewModel.currentSceneIndex)
-                                }
-                                .foregroundColor(.white)
                             }
                         }
 

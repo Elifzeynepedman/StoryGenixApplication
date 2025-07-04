@@ -77,8 +77,8 @@ struct RouterViewModifier: ViewModifier {
             VoiceScreen(script: script, topic: topic)
         case .images(let script, let topic):
             ImageScreen(script: script, topic: topic)
-        case .videopreview(let script, let topic):
-            VideoPreviewScreen(script: script, topic: topic)
+        case .videopreview(let script, let topic,let projectID):
+            VideoPreviewScreen(script: script, topic: topic, projectID: projectID)
         case .videocomplete(let project):
             VideoCompleteScreen(project: project)
         }

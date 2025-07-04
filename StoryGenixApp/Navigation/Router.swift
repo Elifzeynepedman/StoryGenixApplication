@@ -13,7 +13,7 @@ enum Route: Hashable {
     case script(topic: String)
     case voice(script: String, topic: String)
     case images(script: String, topic: String)
-    case videopreview(script: String, topic: String)
+    case videopreview(script: String, topic: String, projectID: UUID)
     case videocomplete(project: VideoProject)
 }
 
@@ -33,8 +33,8 @@ class Router {
     func goToImages(script: String, topic: String) {
         path.append(Route.images(script: script, topic: topic))
     }
-    func goToVideoPreview(script: String, topic: String) {
-        path.append(Route.videopreview(script: script, topic: topic))
+    func goToVideoPreview(script: String, topic: String, projectID: UUID) {
+        path.append(Route.videopreview(script: script, topic: topic, projectID: projectID))
     }
     func goToVideoComplete(project: VideoProject) {
         path.append(Route.videocomplete(project: project))

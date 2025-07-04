@@ -64,7 +64,9 @@ struct ProjectsScreen: View {
 
                             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 20) {
                                 ForEach(completedProjects) { project in
-                                    CompletedProjectCard(project: project)
+                                    CompletedProjectCard(project: project, onDelete: {
+                                        viewModel.deleteProject(project)
+                                    })
                                 }
                             }
                             .padding(.horizontal, 50)

@@ -5,11 +5,11 @@ import Combine
 struct VideoPreviewScreen: View {
     let script: String
     let topic: String
+    let projectID: UUID
 
     @StateObject private var viewModel = VideoPreviewViewModel()
     @State private var player = AVPlayer()
     @State private var showSelectionWarning = false
-    @State private var projectID = UUID()
 
     @Environment(Router.self) private var router
     @EnvironmentObject private var projectViewModel: ProjectsViewModel
@@ -70,7 +70,7 @@ struct VideoPreviewScreen: View {
                                 canGoNext: viewModel.currentSceneIndex < viewModel.scenes.count - 1,
                                 isLoading: viewModel.isLoading,
                                 shouldShowNavigation: true,
-                                generateButtonTitle: "Generate Video"
+                                generateButtonTitle: currentScene.videoURL == nil ? "Generate Video" : "Regenerate Video"
                             )
 
                             if showSelectionWarning {
@@ -125,6 +125,7 @@ struct VideoPreviewScreen: View {
                                 if viewModel.currentSceneIndex == viewModel.scenes.count - 1 {
                                     SecondaryActionButton(title: "Continue to Final") {
                                         let project = VideoProject(
+                                            id: projectID,
                                             title: topic,
                                             script: script,
                                             thumbnail: viewModel.scenes.first?.previewImage ?? "defaultThumbnail",
@@ -133,21 +134,16 @@ struct VideoPreviewScreen: View {
                                             progressStep: 3
                                         )
 
-                                        if !projectViewModel.allProjects.contains(where: { $0.id == project.id }) {
-                                            projectViewModel.addProject(project)
-                                        } else {
+                                        if let index = projectViewModel.allProjects.firstIndex(where: { $0.id == project.id }) {
                                             projectViewModel.updateProject(project)
+                                        } else {
+                                            projectViewModel.addProject(project)
                                         }
 
                                         router.goToVideoComplete(project: project)
                                     }
                                     .padding(.horizontal, 30)
                                 }
-
-                                Button("Regenerate Video") {
-                                    viewModel.generateVideo(for: viewModel.currentSceneIndex)
-                                }
-                                .foregroundColor(.white)
                             }
                         }
 
@@ -159,9 +155,8 @@ struct VideoPreviewScreen: View {
         .onAppear {
             viewModel.loadScenes(from: script)
 
-            // Save as unfinished draft
             let draft = VideoProject(
-                id: projectID, // use persistent ID
+                id: projectID,
                 title: topic,
                 script: script,
                 thumbnail: viewModel.scenes.first?.previewImage ?? "defaultThumbnail",
@@ -170,7 +165,7 @@ struct VideoPreviewScreen: View {
                 progressStep: 3
             )
 
-            if let index = projectViewModel.allProjects.firstIndex(where: { $0.title == draft.title && !$0.isCompleted }) {
+            if let index = projectViewModel.allProjects.firstIndex(where: { $0.id == draft.id }) {
                 projectViewModel.updateProject(draft)
             } else {
                 projectViewModel.addProject(draft)
@@ -178,6 +173,7 @@ struct VideoPreviewScreen: View {
         }
     }
 }
+
 
 #Preview {
     VideoPreviewScreen(
@@ -187,7 +183,7 @@ struct VideoPreviewScreen: View {
 
         Behind every blink is a complex system — the cornea, lens, and retina all working together like a perfect machine.
         """,
-        topic: "How Eyes Work"
+        topic: "How Eyes Work",projectID: UUID()
     )
     .environment(Router())
     .environmentObject(ProjectsViewModel())

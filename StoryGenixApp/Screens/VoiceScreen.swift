@@ -4,13 +4,14 @@
 //
 //  Created by Elif Edman on 29.06.2025.
 //
+
 import SwiftUI
 import AVFoundation
 
 struct VoiceScreen: View {
     let script: String
     let topic: String
-    
+
     @State private var selectedGender = "Female"
     @State private var selectedVoice = "Jennie"
     @State private var isGenerating = false
@@ -31,13 +32,20 @@ struct VoiceScreen: View {
             VStack(spacing: 28) {
                 headerSection
                 voiceGridSection
-                PrimaryGradientButton(title: "Generate Voice", isLoading: isGenerating, action: generateVoice)
-                    .frame(maxWidth: 370)
-                    .disabled(isGenerating)
+
+                // 👇 Dynamic button title
+                PrimaryGradientButton(
+                    title: audioURL == nil ? "Generate Voice" : "Regenerate Voice",
+                    isLoading: isGenerating,
+                    action: generateVoice
+                )
+                .frame(maxWidth: 370)
+                .disabled(isGenerating)
 
                 if audioURL != nil {
                     audioPlayerSection
                 }
+
                 Spacer()
             }
             .frame(width: 390)
@@ -123,15 +131,10 @@ struct VoiceScreen: View {
                     .font(.caption)
             }
             .frame(maxWidth: 350)
-            
+
             SecondaryActionButton(title: "Continue to Images") {
                 router.goToImages(script: script, topic: topic)
             }
-
-            PlainTextButton(title: "Regenrate Voice", action: generateVoice)
-                .disabled(isGenerating)
-                .padding(.bottom, 40)
-                .padding(.top, -10)
         }
     }
 
@@ -143,6 +146,7 @@ struct VoiceScreen: View {
         }
     }
 }
+
 
 #Preview {
     VoiceScreen(
