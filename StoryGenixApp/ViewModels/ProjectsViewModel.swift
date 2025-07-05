@@ -57,4 +57,7 @@ class ProjectsViewModel: ObservableObject {
         allProjects.append(completed)
         ProjectStorageManager.save(allProjects)
     }
+    func project(for id: UUID) -> VideoProject? {
+        allProjects.first(where: { $0.id == id })
+    }
 }

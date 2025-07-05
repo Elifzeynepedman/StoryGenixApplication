@@ -13,6 +13,7 @@ struct CompletedProjectCard: View {
 
     @State private var isViewPressed = false
     @State private var isDeletePressed = false
+    @State private var showPreview = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -32,7 +33,7 @@ struct CompletedProjectCard: View {
                     isViewPressed = true
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
                         isViewPressed = false
-                        print("Share \(project.title)")
+                        showPreview = true
                     }
                 }) {
                     Text("View")
@@ -57,7 +58,7 @@ struct CompletedProjectCard: View {
                     isDeletePressed = true
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
                         isDeletePressed = false
-                        onDelete() // ✅ actually perform delete
+                        onDelete()
                     }
                 }) {
                     Text("Delete")
@@ -75,11 +76,14 @@ struct CompletedProjectCard: View {
                         )
                         .animation(.easeInOut(duration: 0.2), value: isDeletePressed)
                 }
-
             }
         }
         .padding()
         .background(Color.white.opacity(0.05))
         .cornerRadius(14)
+        .sheet(isPresented: $showPreview) {
+            ProjectPreviewModal(project: project, isPresented: $showPreview)
+        }
     }
 }
+

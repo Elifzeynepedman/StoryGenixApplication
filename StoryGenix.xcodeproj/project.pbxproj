@@ -29,22 +29,9 @@
 		8FCDFA542E113F580094D0C2 /* StoryGenixAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StoryGenixAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		8F22CC4F2E16F06900341D30 /* Exceptions for "StoryGenixApp" folder in "StoryGenixApp" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Untitled.swift,
-			);
-			target = 8FCDFA3C2E113F540094D0C2 /* StoryGenixApp */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		8FCDFA3F2E113F540094D0C2 /* StoryGenixApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				8F22CC4F2E16F06900341D30 /* Exceptions for "StoryGenixApp" folder in "StoryGenixApp" target */,
-			);
 			path = StoryGenixApp;
 			sourceTree = "<group>";
 		};

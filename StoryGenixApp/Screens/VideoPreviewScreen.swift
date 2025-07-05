@@ -140,7 +140,9 @@ struct VideoPreviewScreen: View {
                                             projectViewModel.addProject(project)
                                         }
 
-                                        router.goToVideoComplete(project: project)
+                                        if let project = projectViewModel.project(for: projectID) {
+                                            router.goToVideoComplete(project: project)
+                                        }
                                     }
                                     .padding(.horizontal, 30)
                                 }
