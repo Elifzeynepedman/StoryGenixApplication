@@ -1,22 +1,16 @@
-//
-//  VoiceScreen.swift
-//  StoryGenixApp
-//
-//  Created by Elif Edman on 29.06.2025.
-//
-
 import SwiftUI
 import AVFoundation
 
 struct VoiceScreen: View {
-    let script: String
-    let topic: String
+    let project: VideoProject
 
     @State private var selectedGender = "Female"
     @State private var selectedVoice = "Jennie"
     @State private var isGenerating = false
     @State private var audioURL: URL? = nil
+
     @Environment(Router.self) private var router
+    @EnvironmentObject private var projectViewModel: ProjectsViewModel
 
     let femaleVoices = ["Jennie", "Elif", "Sarah", "Katie"]
     let maleVoices = ["Brian", "David", "Alex", "Mike"]
@@ -33,7 +27,6 @@ struct VoiceScreen: View {
                 headerSection
                 voiceGridSection
 
-                // 👇 Dynamic button title
                 PrimaryGradientButton(
                     title: audioURL == nil ? "Generate Voice" : "Regenerate Voice",
                     isLoading: isGenerating,
@@ -67,6 +60,7 @@ struct VoiceScreen: View {
                 .foregroundStyle(.white)
                 .font(.system(size: 34, weight: .bold))
                 .multilineTextAlignment(.center)
+
             SegmentedToggle(options: ["Female", "Male"], selected: $selectedGender)
                 .frame(width: 280, height: 35)
                 .background(
@@ -112,7 +106,7 @@ struct VoiceScreen: View {
                 .frame(height: 140)
                 .overlay(
                     ScrollView {
-                        Text(script)
+                        Text(project.script)
                             .padding(20)
                             .font(.system(size: 14))
                             .foregroundColor(.white)
@@ -133,7 +127,10 @@ struct VoiceScreen: View {
             .frame(maxWidth: 350)
 
             SecondaryActionButton(title: "Continue to Images") {
-                router.goToImages(script: script, topic: topic)
+                var updated = project
+                updated.progressStep = 2
+
+                projectViewModel.upsertAndNavigate(updated) { router.goToImages(project: $0) }
             }
         }
     }
@@ -145,12 +142,4 @@ struct VoiceScreen: View {
             isGenerating = false
         }
     }
-}
-
-
-#Preview {
-    VoiceScreen(
-        script: "This is the sample script that will be generated and bla bla bla bla bla.",
-        topic: "How Eyes Work"
-    ).withRouter()
 }

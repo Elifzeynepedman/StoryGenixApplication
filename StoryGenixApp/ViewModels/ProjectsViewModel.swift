@@ -4,12 +4,6 @@
 //
 //  Created by Elif Edman on 2.07.2025.
 //
-//
-//  ProjectsViewModel.swift
-//  StoryGenix
-//
-//  Created by Elif Edman on 2.07.2025.
-//
 
 import Foundation
 
@@ -21,9 +15,12 @@ class ProjectsViewModel: ObservableObject {
     }
 
     func addProject(_ project: VideoProject) {
-        allProjects.append(project)
-        ProjectStorageManager.save(allProjects)
+        if !allProjects.contains(where: { $0.id == project.id }) {
+            allProjects.append(project)
+            ProjectStorageManager.save(allProjects)
+        }
     }
+
 
     func updateProject(_ updated: VideoProject) {
         if let index = allProjects.firstIndex(where: { $0.id == updated.id }) {
@@ -41,15 +38,10 @@ class ProjectsViewModel: ObservableObject {
         print("Sharing: \(project.title)")
     }
 
-    func resumeProject(_ project: VideoProject) {
-        print("Resuming: \(project.title)")
-    }
-
     func openCompletedProject(_ project: VideoProject) {
         print("Opening completed project: \(project.title)")
     }
 
-    /// ✅ Replaces any unfinished draft (by same title or ID) with completed version
     func replaceWithCompleted(_ completed: VideoProject) {
         allProjects.removeAll {
             $0.id == completed.id || ($0.title == completed.title && !$0.isCompleted)
@@ -57,7 +49,22 @@ class ProjectsViewModel: ObservableObject {
         allProjects.append(completed)
         ProjectStorageManager.save(allProjects)
     }
+
     func project(for id: UUID) -> VideoProject? {
         allProjects.first(where: { $0.id == id })
+    }
+
+    func resumeProject(_ project: VideoProject, using router: Router) {
+        print("Resuming: \(project.title) at step \(project.progressStep)")
+        router.goToStep(for: project)
+    }
+    
+    func upsertAndNavigate(_ project: VideoProject, route: (VideoProject) -> Void) {
+        if self.project(for: project.id) != nil {
+            updateProject(project)
+        } else {
+            addProject(project)
+        }
+        route(project)
     }
 }

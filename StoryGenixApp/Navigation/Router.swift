@@ -1,19 +1,19 @@
-//
-//  Router.swift
-//  StoryGenixApp
-//
-//  Created by Elif Edman on 29.06.2025.
-//
-
 import SwiftUI
 import Observation
+
+enum ProgressStep: Int {
+    case script = 1
+    case voice = 2
+    case image = 3
+    case video = 4
+}
 
 enum Route: Hashable {
     case home
     case script(topic: String)
-    case voice(script: String, topic: String)
-    case images(script: String, topic: String)
-    case videopreview(script: String, topic: String, projectID: UUID)
+    case voice(project: VideoProject)
+    case images(project: VideoProject)
+    case videopreview(project: VideoProject)
     case videocomplete(project: VideoProject)
 }
 
@@ -24,21 +24,42 @@ class Router {
     func goToHome() {
         path = NavigationPath()
     }
+
     func goToScript(topic: String) {
         path.append(Route.script(topic: topic))
     }
-    func goToVoice(script: String, topic: String) {
-        path.append(Route.voice(script: script, topic: topic))
+    
+    func goToVoice(project: VideoProject) {
+        path.append(Route.voice(project: project))
     }
-    func goToImages(script: String, topic: String) {
-        path.append(Route.images(script: script, topic: topic))
+
+    func goToImages(project: VideoProject) {
+        path.append(Route.images(project: project))
     }
-    func goToVideoPreview(script: String, topic: String, projectID: UUID) {
-        path.append(Route.videopreview(script: script, topic: topic, projectID: projectID))
+
+    func goToVideoPreview(project: VideoProject) {
+        path.append(Route.videopreview(project: project))
     }
+
     func goToVideoComplete(project: VideoProject) {
         path.append(Route.videocomplete(project: project))
+    }
+    
+    func goToStep(for project: VideoProject) {
+        switch project.progressStep {
+        case 1:
+            goToVoice(project: project)
+        case 2:
+            goToImages(project: project)
+        case 3:
+            goToVideoPreview(project: project)
+        case 4:
+            goToVideoComplete(project: project)
+        default:
+            goToScript(topic: project.title)
+        }
     }
 
 
 }
+
