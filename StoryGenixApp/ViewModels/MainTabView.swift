@@ -1,10 +1,3 @@
-//
-//  MainTabView.swift
-//  StoryGenix
-//
-//  Created by Elif Edman on 2.07.2025.
-//
-
 import SwiftUI
 
 struct MainTabView: View {
@@ -31,9 +24,15 @@ struct MainTabView: View {
             .tag(0)
 
             // Projects Tab
-            NavigationStack {
+            NavigationStack(path: $router.path) {
                 ProjectsScreen()
+                    .environment(router)
                     .environmentObject(projectViewModel)
+                    .navigationDestination(for: Route.self) { route in
+                        routeView(for: route)
+                            .environment(router)
+                            .environmentObject(projectViewModel)
+                    }
             }
             .tabItem {
                 Label("Projects", systemImage: "folder.fill")
@@ -49,6 +48,12 @@ struct MainTabView: View {
             }
             .tag(2)
         }
+        // ✅ Reset navigation path when switching to Projects tab
+        .onChange(of: selectedTab) { tab in
+            if tab == 1 {
+                router.goToHome()
+            }
+        }
     }
 
     @ViewBuilder
@@ -58,12 +63,12 @@ struct MainTabView: View {
             ContentView()
         case .script(let topic):
             ScriptScreen(topic: topic)
-        case .voice(let script, let topic):
-            VoiceScreen(script: script, topic: topic)
-        case .images(let script, let topic):
-            ImageScreen(script: script, topic: topic)
-        case .videopreview(let script, let topic,let projectID):
-            VideoPreviewScreen(script: script, topic: topic, projectID: projectID)
+        case .voice(let project):
+            VoiceScreen(project: project)
+        case .images(let project):
+            ImageScreen(project: project)
+        case .videopreview(let project):
+            VideoPreviewScreen(project: project)
         case .videocomplete(let project):
             VideoCompleteScreen(project: project)
         }

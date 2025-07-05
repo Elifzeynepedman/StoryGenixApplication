@@ -15,6 +15,8 @@ struct VideoProject: Identifiable, Codable, Hashable {
     var scenes: [VideoScene]
     var isCompleted: Bool
     var progressStep: Int
+    var currentSceneIndex: Int? = nil
+    var selectedImageIndices: [Int: Int] = [:]
 
     init(
         id: UUID = UUID(),
@@ -23,7 +25,8 @@ struct VideoProject: Identifiable, Codable, Hashable {
         thumbnail: String,
         scenes: [VideoScene] = [],
         isCompleted: Bool,
-        progressStep: Int
+        progressStep: Int,
+        currentSceneIndex: Int? = nil // ✅ INCLUDE HERE TOO
     ) {
         self.id = id
         self.title = title
@@ -32,5 +35,8 @@ struct VideoProject: Identifiable, Codable, Hashable {
         self.scenes = scenes
         self.isCompleted = isCompleted
         self.progressStep = progressStep
+        self.currentSceneIndex = currentSceneIndex
     }
 }
+
+

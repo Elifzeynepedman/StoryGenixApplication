@@ -14,3 +14,5 @@ struct ImageScene: Identifiable{
     var generatedImages: [String] = [] // still using String for image ID or name
     var selectedImage: String? = nil
 }
+
+

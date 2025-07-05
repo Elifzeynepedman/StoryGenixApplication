@@ -10,7 +10,7 @@
 //
 //  Created by Elif Edman on 29.06.2025.
 //
-
+/*
 import SwiftUI
 import Foundation
 
@@ -90,3 +90,4 @@ extension View {
         self.modifier(RouterViewModifier())
     }
 }
+*/

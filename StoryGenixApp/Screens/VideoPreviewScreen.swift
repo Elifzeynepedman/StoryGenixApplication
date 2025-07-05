@@ -3,9 +3,8 @@ import AVKit
 import Combine
 
 struct VideoPreviewScreen: View {
-    let script: String
-    let topic: String
-    let projectID: UUID
+    let project: VideoProject
+    
 
     @StateObject private var viewModel = VideoPreviewViewModel()
     @State private var player = AVPlayer()
@@ -124,28 +123,20 @@ struct VideoPreviewScreen: View {
 
                                 if viewModel.currentSceneIndex == viewModel.scenes.count - 1 {
                                     SecondaryActionButton(title: "Continue to Final") {
-                                        let project = VideoProject(
-                                            id: projectID,
-                                            title: topic,
-                                            script: script,
+                                        var updated = VideoProject(
+                                            id: project.id,
+                                            title: project.title,
+                                            script: project.script,
                                             thumbnail: viewModel.scenes.first?.previewImage ?? "defaultThumbnail",
                                             scenes: viewModel.scenes,
-                                            isCompleted: false,
-                                            progressStep: 3
+                                            isCompleted: true,
+                                            progressStep: 4
                                         )
+                                        updated.currentSceneIndex = viewModel.currentSceneIndex
 
-                                        if let index = projectViewModel.allProjects.firstIndex(where: { $0.id == project.id }) {
-                                            projectViewModel.updateProject(project)
-                                        } else {
-                                            projectViewModel.addProject(project)
-                                        }
-
-                                        if let project = projectViewModel.project(for: projectID) {
-                                            router.goToVideoComplete(project: project)
-                                        }
+                                        projectViewModel.upsertAndNavigate(updated) { router.goToVideoComplete(project: $0) }
                                     }
-                                    .padding(.horizontal, 30)
-                                }
+                                    .padding(.horizontal, 30)                                }
                             }
                         }
 
@@ -155,12 +146,12 @@ struct VideoPreviewScreen: View {
             }
         }
         .onAppear {
-            viewModel.loadScenes(from: script)
+            viewModel.loadScenes(from: project.script)
 
             let draft = VideoProject(
-                id: projectID,
-                title: topic,
-                script: script,
+                id: project.id,
+                title: project.title,
+                script: project.script,
                 thumbnail: viewModel.scenes.first?.previewImage ?? "defaultThumbnail",
                 scenes: viewModel.scenes,
                 isCompleted: false,
@@ -178,15 +169,18 @@ struct VideoPreviewScreen: View {
 
 
 #Preview {
-    VideoPreviewScreen(
+    let sampleProject = VideoProject(
+        title: "How Eyes Work",
         script: """
         The human eye is one of the most extraordinary organs in the body.
         It captures light, interprets color, and helps us understand the world around us.
-
-        Behind every blink is a complex system — the cornea, lens, and retina all working together like a perfect machine.
         """,
-        topic: "How Eyes Work",projectID: UUID()
+        thumbnail: "defaultThumbnail",
+        isCompleted: false,
+        progressStep: 3
     )
-    .environment(Router())
-    .environmentObject(ProjectsViewModel())
+
+    return VideoPreviewScreen(project: sampleProject)
+        .environment(Router())
+        .environmentObject(ProjectsViewModel())
 }

@@ -11,6 +11,9 @@ struct UnfinishedProjectCard: View {
     let project: VideoProject
     var onDelete: () -> Void
 
+    @EnvironmentObject private var viewModel: ProjectsViewModel
+    @Environment(Router.self) private var router
+
     var body: some View {
         HStack {
             Image(project.thumbnail)
@@ -27,7 +30,7 @@ struct UnfinishedProjectCard: View {
                 ProgressView(value: Double(project.progressStep), total: 4)
                     .accentColor(.white)
 
-                Text("Step \(project.progressStep) of 4")
+                Text(statusLabel(for: project.progressStep))
                     .font(.caption)
                     .foregroundColor(.white.opacity(0.7))
             }
@@ -35,7 +38,11 @@ struct UnfinishedProjectCard: View {
             Spacer()
 
             Button(action: {
-                print("Resume tapped")
+                if let latest = viewModel.project(for: project.id) {
+                    viewModel.resumeProject(latest, using: router)
+                } else {
+                    print("⚠️ Could not find latest version of project \(project.id)")
+                }
             }) {
                 Image(systemName: "play.fill")
                     .foregroundColor(.white)
@@ -55,5 +62,14 @@ struct UnfinishedProjectCard: View {
         .padding()
         .background(Color.white.opacity(0.05))
         .cornerRadius(14)
+    }
+
+    private func statusLabel(for step: Int) -> String {
+        switch step {
+        case 1: return "Continue from Voice"
+        case 2: return "Continue from Images"
+        case 3: return "Continue from Video"
+        default: return "Continue Project"
+        }
     }
 }
