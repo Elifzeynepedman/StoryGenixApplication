@@ -72,5 +72,4 @@ struct MainTabView: View {
         case .videocomplete(let project):
             VideoCompleteScreen(project: project)
         }
-    }
-}
+    }}
