@@ -6,11 +6,16 @@
 //
 
 import SwiftUI
+import Speech
+import AVFoundation
 
 struct ContentView: View {
+    @StateObject private var speechRecognizer = SpeechRecognizer()
+    @Environment(Router.self) private var router
+
     @State private var topic: String = ""
     @State private var showEmptyError = false
-    @Environment(Router.self) private var router
+    @State private var micPulse = false
 
     let randomTopics = [
         "The Eye of a Storm",
@@ -55,15 +60,14 @@ struct ContentView: View {
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 3)
-                        .fixedSize(horizontal: false, vertical: true)
 
                     Spacer()
-                    
+
                     // Input + Mic Button
                     HStack(alignment: .top, spacing: 8) {
                         ZStack(alignment: .topLeading) {
                             if topic.isEmpty {
-                                Text("Type what youryour topic here...")
+                                Text("Describe your topic here...")
                                     .foregroundColor(.white.opacity(0.8))
                                     .padding(14)
                             }
@@ -77,16 +81,34 @@ struct ContentView: View {
                         }
 
                         Button(action: {
-                            // Future: trigger speech input
-                            print("Mic button tapped — trigger voice input")
+                            if speechRecognizer.isRecording {
+                                speechRecognizer.stopTranscribing()
+                            } else {
+                                speechRecognizer.transcript = topic // sync current input
+                                speechRecognizer.requestAuthorization { granted in
+                                    if granted {
+                                        try? speechRecognizer.startTranscribing()
+                                    }
+                                }
+                            }
                         }) {
-                            Image(systemName: "mic.fill")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 20, height: 20)
-                                .foregroundColor(.white.opacity(0.85))
-                                .padding(.top, 12)
-                                .padding(.trailing, 6)
+                            ZStack {
+                                if speechRecognizer.isRecording {
+                                    Circle()
+                                        .fill(Color("DarkText").opacity(0.4))
+                                        .frame(width: 34, height: 34)
+                                        .scaleEffect(micPulse ? 1.2 : 0.8)
+                                        .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: micPulse)
+                                }
+
+                                Image(systemName: "mic.fill")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 20, height: 20)
+                                    .foregroundColor(.white.opacity(0.85))
+                            }
+                            .padding(.top, 12)
+                            .padding(.trailing, 6)
                         }
                     }
                     .frame(height: 100)
@@ -111,9 +133,11 @@ struct ContentView: View {
                     .padding(.horizontal, 30)
                     .padding(.top, -20)
 
+                    // Surprise Me Button
                     Button(action: {
                         topic = randomTopics.randomElement() ?? "The Universe"
                         showEmptyError = false
+                        speechRecognizer.transcript = topic
                     }) {
                         HStack(spacing: 6) {
                             Image(systemName: "sparkles")
@@ -125,15 +149,14 @@ struct ContentView: View {
 
                     // Generate Video Button
                     Button(action: {
-                        if topic.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        let trimmed = topic.trimmingCharacters(in: .whitespacesAndNewlines)
+                        if trimmed.isEmpty {
                             showEmptyError = true
-                            
                             DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                                 showEmptyError = false
                             }
                         } else {
-                            showEmptyError = false
-                            router.goToScript(topic: topic)
+                            router.goToScript(topic: trimmed)
                         }
                     }) {
                         Text("Generate Video")
@@ -176,9 +199,15 @@ struct ContentView: View {
             }
         }
         .frame(maxHeight: .infinity, alignment: .center)
+        .onReceive(speechRecognizer.$transcript) { live in
+            topic = live // always append to whatever was there
+        }
+        .onChange(of: speechRecognizer.isRecording) { isRecording in
+            micPulse = isRecording
+        }
     }
 }
 
 #Preview {
-
+    ContentView().environment(Router())
 }
