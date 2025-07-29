@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Combine
 
 class ImageViewModel: ObservableObject {
     @Published var scenes: [ImageScene] = []
@@ -16,23 +15,31 @@ class ImageViewModel: ObservableObject {
     @Published var selectedAspect = "1:1"
     @Published var selectedImageIndices: [Int?] = []
 
-    // MARK: - Load Script into Scenes
-    func loadScenes(from script: String, existingSelections: [Int?] = []) {
+    /// Load scenes with script lines and LLM-generated scene details
+    func loadScenes(from script: String, sceneDetails: [String], existingSelections: [Int?] = []) {
         let lines = script
             .components(separatedBy: "\n")
             .filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
 
-        self.scenes = lines.map { line in
-            let prompt = convertScriptLineToLeonardoPrompt(line)
-            return ImageScene(sceneText: line, prompt: prompt)
+        self.scenes = lines.enumerated().map { index, line in
+            let cleanLine = line.trimmingCharacters(in: .whitespaces)
+            let detail = index < sceneDetails.count ? sceneDetails[index].trimmingCharacters(in: .whitespaces) : cleanLine
+
+            let prompt = "Highly detailed cinematic illustration of: \(detail). Sharp lighting, vibrant colors, depth, photorealistic, ultra-realistic texture."
+            
+            return ImageScene(sceneText: cleanLine, prompt: prompt)
         }
 
-        // Initialize or restore selection
+        restoreSelections(existingSelections)
+    }
+
+    /// Restore previously selected images if any
+    private func restoreSelections(_ existingSelections: [Int?]) {
         if existingSelections.count == scenes.count {
             self.selectedImageIndices = existingSelections
             for (i, index) in existingSelections.enumerated() {
                 if let idx = index {
-                    scenes[i].selectedImage = "Efes\(idx + 1)"
+                    scenes[i].selectedImage = "Efes\(idx + 1)" // Mock placeholder
                 }
             }
             self.currentSceneIndex = existingSelections.firstIndex(where: { $0 == nil }) ?? 0
@@ -42,10 +49,7 @@ class ImageViewModel: ObservableObject {
         }
     }
 
-    func convertScriptLineToLeonardoPrompt(_ line: String) -> String {
-        return "Highly detailed cinematic illustration of: \(line.lowercased()). Sharp lighting, depth, and atmosphere."
-    }
-
+    /// Generate images (mock for now)
     func generateImages(for index: Int) {
         guard scenes.indices.contains(index) else { return }
         isLoading = true
@@ -57,16 +61,16 @@ class ImageViewModel: ObservableObject {
         }
     }
 
+    /// Select an image for the scene
     func selectImage(_ image: String, for index: Int) {
         guard scenes.indices.contains(index) else { return }
         scenes[index].selectedImage = image
-
-        // Save index
         if let idx = scenes[index].generatedImages.firstIndex(of: image) {
             selectedImageIndices[index] = idx
         }
     }
 
+    /// Update Leonardo prompt for a scene
     func updatePrompt(for index: Int, newPrompt: String) {
         guard scenes.indices.contains(index) else { return }
         scenes[index].prompt = newPrompt

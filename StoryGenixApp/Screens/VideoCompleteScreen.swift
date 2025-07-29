@@ -121,7 +121,7 @@ struct VideoCompleteScreen: View {
                     .foregroundColor(.white)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 10)
-                    .background(Color("DarkText").opacity(0.85))
+                    .background(Color("DarkTextColor").opacity(0.85))
                     .clipShape(Capsule())
                     .padding(.top, 20)
                     .transition(.move(edge: .top).combined(with: .opacity))

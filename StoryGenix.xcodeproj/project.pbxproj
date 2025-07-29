@@ -6,6 +6,14 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		8FBF56BC2E1BAD0B0052F2D3 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 8FBF56BB2E1BAD0B0052F2D3 /* FirebaseAnalytics */; };
+		8FBF56BE2E1BAD0B0052F2D3 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 8FBF56BD2E1BAD0B0052F2D3 /* FirebaseAuth */; };
+		8FBF56C02E1BAD0B0052F2D3 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 8FBF56BF2E1BAD0B0052F2D3 /* FirebaseCore */; };
+		8FBF56C32E1BB21F0052F2D3 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 8FBF56C22E1BB21F0052F2D3 /* GoogleSignIn */; };
+		8FBF56C52E1BB21F0052F2D3 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 8FBF56C42E1BB21F0052F2D3 /* GoogleSignInSwift */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		8FCDFA4B2E113F580094D0C2 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -29,9 +37,22 @@
 		8FCDFA542E113F580094D0C2 /* StoryGenixAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StoryGenixAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		8FBF56C92E1BB39A0052F2D3 /* Exceptions for "StoryGenixApp" folder in "StoryGenixApp" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 8FCDFA3C2E113F540094D0C2 /* StoryGenixApp */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		8FCDFA3F2E113F540094D0C2 /* StoryGenixApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				8FBF56C92E1BB39A0052F2D3 /* Exceptions for "StoryGenixApp" folder in "StoryGenixApp" target */,
+			);
 			path = StoryGenixApp;
 			sourceTree = "<group>";
 		};
@@ -52,6 +73,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8FBF56C52E1BB21F0052F2D3 /* GoogleSignInSwift in Frameworks */,
+				8FBF56BC2E1BAD0B0052F2D3 /* FirebaseAnalytics in Frameworks */,
+				8FBF56C32E1BB21F0052F2D3 /* GoogleSignIn in Frameworks */,
+				8FBF56C02E1BAD0B0052F2D3 /* FirebaseCore in Frameworks */,
+				8FBF56BE2E1BAD0B0052F2D3 /* FirebaseAuth in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +138,11 @@
 			);
 			name = StoryGenixApp;
 			packageProductDependencies = (
+				8FBF56BB2E1BAD0B0052F2D3 /* FirebaseAnalytics */,
+				8FBF56BD2E1BAD0B0052F2D3 /* FirebaseAuth */,
+				8FBF56BF2E1BAD0B0052F2D3 /* FirebaseCore */,
+				8FBF56C22E1BB21F0052F2D3 /* GoogleSignIn */,
+				8FBF56C42E1BB21F0052F2D3 /* GoogleSignInSwift */,
 			);
 			productName = StoryGenixApp;
 			productReference = 8FCDFA3D2E113F540094D0C2 /* StoryGenixApp.app */;
@@ -195,6 +226,10 @@
 			);
 			mainGroup = 8FCDFA342E113F540094D0C2;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				8FBF56BA2E1BAD0B0052F2D3 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				8FBF56C12E1BB21F0052F2D3 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 8FCDFA3E2E113F540094D0C2 /* Products */;
 			projectDirPath = "";
@@ -398,6 +433,7 @@
 				DEVELOPMENT_TEAM = 6C6C3PR7X5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = StoryGenixApp/Info.plist;
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "This app saves videos you create to your photo library.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app needs access to your photo library to preview and share videos.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -428,6 +464,7 @@
 				DEVELOPMENT_TEAM = 6C6C3PR7X5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = StoryGenixApp/Info.plist;
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "This app saves videos you create to your photo library.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app needs access to your photo library to preview and share videos.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -556,6 +593,53 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		8FBF56BA2E1BAD0B0052F2D3 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.15.0;
+			};
+		};
+		8FBF56C12E1BB21F0052F2D3 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		8FBF56BB2E1BAD0B0052F2D3 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8FBF56BA2E1BAD0B0052F2D3 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		8FBF56BD2E1BAD0B0052F2D3 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8FBF56BA2E1BAD0B0052F2D3 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		8FBF56BF2E1BAD0B0052F2D3 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8FBF56BA2E1BAD0B0052F2D3 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		8FBF56C22E1BB21F0052F2D3 /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8FBF56C12E1BB21F0052F2D3 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+		8FBF56C42E1BB21F0052F2D3 /* GoogleSignInSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8FBF56C12E1BB21F0052F2D3 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignInSwift;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 8FCDFA352E113F540094D0C2 /* Project object */;
 }

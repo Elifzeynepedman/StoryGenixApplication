@@ -15,6 +15,8 @@ enum Route: Hashable {
     case images(project: VideoProject)
     case videopreview(project: VideoProject)
     case videocomplete(project: VideoProject)
+    case appSettings
+    case contact
 }
 
 @Observable
@@ -44,6 +46,14 @@ class Router {
     func goToVideoComplete(project: VideoProject) {
         path.append(Route.videocomplete(project: project))
     }
+    func goToAppSettings() {
+        path.append(Route.appSettings)
+    }
+
+    func goToContact() {
+        path.append(Route.contact)
+    }
+
     
     func goToStep(for project: VideoProject) {
         switch project.progressStep {

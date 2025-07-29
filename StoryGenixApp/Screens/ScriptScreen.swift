@@ -1,24 +1,18 @@
-//
-//  ScriptScreen.swift
-//  StoryGenixApp
-//
-//  Created by Elif Edman on 29.06.2025.
-//
-
 import SwiftUI
 
 struct ScriptScreen: View {
     let topic: String
     @State private var mode = "Auto-Generated"
-    @State private var aiScriptText = ""
     @State private var customScriptText = ""
-    @State private var isLoading = false
+    @StateObject private var viewModel = ScriptLogicViewModel()
 
     @Environment(Router.self) private var router
     @EnvironmentObject private var projectViewModel: ProjectsViewModel
 
     private var useAIGeneration: Bool { mode == "Auto-Generated" }
-    private var currentScript: String { useAIGeneration ? aiScriptText : customScriptText }
+    private var currentScript: String {
+        useAIGeneration ? viewModel.displayScript : customScriptText
+    }
 
     var body: some View {
         ZStack {
@@ -28,6 +22,7 @@ struct ScriptScreen: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 24) {
+                // Header
                 Text("StoryGenIX")
                     .font(.system(size: 24, weight: .bold))
                     .foregroundColor(.white)
@@ -37,52 +32,68 @@ struct ScriptScreen: View {
                     .foregroundColor(.white)
                     .padding(.top, 10)
 
+                // Toggle
                 SegmentedToggle(options: ["Auto-Generated", "Write My Own"], selected: $mode)
                     .padding(.horizontal, 20)
 
+                // ✅ Script Display Area
                 ZStack(alignment: .topLeading) {
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(Color("DarkText"))
+                    Color("DarkTextColor")
+                        .cornerRadius(16)
 
-                    if !useAIGeneration && customScriptText.isEmpty {
-                        Text("Write your script here...")
-                            .foregroundColor(.white.opacity(0.5))
-                            .padding(24)
-                            .font(.system(size: 16, weight: .medium))
+                    if useAIGeneration {
+                        ScrollView {
+                            Text(viewModel.displayScript.isEmpty ? "Generating script..." : viewModel.displayScript)
+                                .foregroundColor(.white)
+                                .font(.system(size: 16))
+                                .padding(16)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                    } else {
+                        if customScriptText.isEmpty {
+                            Text("Write your script here...")
+                                .foregroundColor(.white.opacity(0.5))
+                                .padding(.top, 12)
+                                .padding(.horizontal, 8)
+                                .font(.system(size: 16))
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+
+                        TextEditor(text: $customScriptText)
+                            .foregroundColor(.white)
+                            .padding(8)
+                            .scrollContentBackground(.hidden)
                     }
-
-                    TextEditor(text: useAIGeneration ? $aiScriptText : $customScriptText)
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundColor(.white)
-                        .scrollContentBackground(.hidden)
-                        .disabled(useAIGeneration)
-                        .padding(20)
                 }
                 .frame(height: 350)
-                .clipShape(RoundedRectangle(cornerRadius: 16))
                 .padding(.horizontal, 20)
 
+                // Buttons
                 SecondaryActionButton(title: "Continue to Voice") {
                     var project = VideoProject(
                         title: topic,
                         script: currentScript,
                         thumbnail: "defaultThumbnail",
-                        isCompleted: false,
+                        sceneDescriptions: viewModel.scenes,                   isCompleted: false,
                         progressStep: 1
                     )
 
-                    // ✅ Immediately save to ProjectsViewModel so it appears in Unfinished list
                     if projectViewModel.project(for: project.id) == nil {
                         projectViewModel.addProject(project)
+                    } else {
+                        projectViewModel.updateProject(project)
                     }
 
-                    // ✅ Navigate forward explicitly
                     router.goToVoice(project: project)
                 }
 
+
+
                 if useAIGeneration {
-                    Button(action: generateScript) {
-                        if isLoading {
+                    Button {
+                        Task { await viewModel.generateScript(for: topic) }
+                    } label: {
+                        if viewModel.isLoading {
                             ProgressView().progressViewStyle(CircularProgressViewStyle(tint: .white))
                         } else {
                             Text("Regenerate Script")
@@ -96,29 +107,10 @@ struct ScriptScreen: View {
                 Spacer()
             }
         }
-        .onChange(of: mode) {
-            if useAIGeneration {
-                generateScript()
-            } else {
-                customScriptText = ""
-            }
-        }
         .onAppear {
-            if useAIGeneration {
-                generateScript()
+            if useAIGeneration && viewModel.script.isEmpty {
+                Task { await viewModel.generateScript(for: topic) }
             }
-        }
-    }
-
-    func generateScript() {
-        isLoading = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            aiScriptText = """
-            The human eye is one of the most extraordinary organs in the body.
-            It captures light, interprets color, and helps us understand the world around us.
-            Behind every blink is a complex system — the cornea, lens, and retina all working together like a perfect machine.
-            """
-            isLoading = false
         }
     }
 }

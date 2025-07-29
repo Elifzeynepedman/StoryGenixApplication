@@ -53,7 +53,7 @@ struct ScriptPromptSection: View {
                 set: { onUpdatePrompt($0) }
             ))
             .scrollContentBackground(.hidden)
-            .background(Color("DarkText"))
+            .background(Color("DarkTextColor"))
             .cornerRadius(12)
             .foregroundColor(.white)
             .padding(.horizontal, 40)

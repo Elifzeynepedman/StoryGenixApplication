@@ -13,6 +13,7 @@ struct VideoProject: Identifiable, Codable, Hashable {
     var script: String
     var thumbnail: String
     var scenes: [VideoScene]
+    var sceneDescriptions: [String] // ✅ Use this for image prompts
     var isCompleted: Bool
     var progressStep: Int
     var currentSceneIndex: Int? = nil
@@ -24,19 +25,19 @@ struct VideoProject: Identifiable, Codable, Hashable {
         script: String = "",
         thumbnail: String,
         scenes: [VideoScene] = [],
+        sceneDescriptions: [String] = [], // ✅ Add default empty
         isCompleted: Bool,
         progressStep: Int,
-        currentSceneIndex: Int? = nil // ✅ INCLUDE HERE TOO
+        currentSceneIndex: Int? = nil
     ) {
         self.id = id
         self.title = title
         self.script = script
         self.thumbnail = thumbnail
         self.scenes = scenes
+        self.sceneDescriptions = sceneDescriptions // ✅ Assign here
         self.isCompleted = isCompleted
         self.progressStep = progressStep
         self.currentSceneIndex = currentSceneIndex
     }
 }
-
-

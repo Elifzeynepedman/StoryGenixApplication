@@ -50,12 +50,18 @@ struct ImageScreen: View {
                 project.selectedImageIndices[index]
             }
 
-            viewModel.loadScenes(from: project.script, existingSelections: restoredSelections)
+            // Use detailed scenes instead of script lines only
+            viewModel.loadScenes(
+                from: project.script,
+                sceneDetails: project.sceneDescriptions, // ✅ Use this
+                existingSelections: restoredSelections
+            )
 
             if let index = project.currentSceneIndex {
                 viewModel.currentSceneIndex = index
             }
         }
+
     }
 
     // MARK: - Scene Section

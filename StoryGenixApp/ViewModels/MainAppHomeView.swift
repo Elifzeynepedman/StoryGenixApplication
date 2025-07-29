@@ -1,22 +1,29 @@
 //
-//  ContentView.swift
-//  StoryGenixApp
+//  MainAppHomeView.swift
+//  StoryGenix
 //
-//  Created by Elif Edman on 29.06.2025.
+//  Created by Elif Edman on 7.07.2025.
 //
 
 import SwiftUI
 import Speech
 import AVFoundation
 
-struct ContentView: View {
+struct MainAppHomeView: View {
     @StateObject private var speechRecognizer = SpeechRecognizer()
     @Environment(Router.self) private var router
 
     @State private var topic: String = ""
     @State private var showEmptyError = false
     @State private var micPulse = false
-    @State private var isLoadingSurprise = false
+
+    let randomTopics = [
+        "The Eye of a Storm",
+        "How Dreams Are Made",
+        "A Robot Learns to Paint",
+        "The Lost Temple of Sound",
+        "What If Trees Could Talk?"
+    ]
 
     var body: some View {
         ZStack {
@@ -88,7 +95,7 @@ struct ContentView: View {
                             ZStack {
                                 if speechRecognizer.isRecording {
                                     Circle()
-                                        .fill(Color("DarkText").opacity(0.4))
+                                        .fill(Color("DarkTextColor").opacity(0.4))
                                         .frame(width: 34, height: 34)
                                         .scaleEffect(micPulse ? 1.2 : 0.8)
                                         .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: micPulse)
@@ -126,18 +133,15 @@ struct ContentView: View {
                     .padding(.horizontal, 30)
                     .padding(.top, -20)
 
-                    // ✅ Surprise Me Button with API Call
+                    // Surprise Me Button
                     Button(action: {
-                        Task { await fetchSurpriseTopic() }
+                        topic = randomTopics.randomElement() ?? "The Universe"
+                        showEmptyError = false
+                        speechRecognizer.transcript = topic
                     }) {
                         HStack(spacing: 6) {
-                            if isLoadingSurprise {
-                                ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                            } else {
-                                Image(systemName: "sparkles")
-                                Text("Surprise Me")
-                            }
+                            Image(systemName: "sparkles")
+                            Text("Surprise Me")
                         }
                         .font(.subheadline)
                         .foregroundColor(.white.opacity(0.85))
@@ -196,36 +200,10 @@ struct ContentView: View {
         }
         .frame(maxHeight: .infinity, alignment: .center)
         .onReceive(speechRecognizer.$transcript) { live in
-            topic = live
+            topic = live // always append to whatever was there
         }
-        .onChange(of: speechRecognizer.isRecording) { isRecording in
-            micPulse = isRecording
+        .onChange(of: speechRecognizer.isRecording) {
+            micPulse = speechRecognizer.isRecording
         }
     }
-
-    // ✅ Fetch surprise topic from backend
-    private func fetchSurpriseTopic() async {
-        isLoadingSurprise = true
-        do {
-            let url = URL(string: "http://192.168.1.247:5001/api/script/create_random_topic")!
-            var request = URLRequest(url: url)
-            request.httpMethod = "POST"
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-            let (data, _) = try await URLSession.shared.data(for: request)
-            struct TopicResponse: Decodable { let topic: String }
-            let result = try JSONDecoder().decode(TopicResponse.self, from: data)
-
-            topic = result.topic
-            showEmptyError = false
-        } catch {
-            print("❌ Error fetching surprise topic: \(error)")
-        }
-        isLoadingSurprise = false
-    }
 }
-
-#Preview {
-    ContentView().environment(Router())
-}
-

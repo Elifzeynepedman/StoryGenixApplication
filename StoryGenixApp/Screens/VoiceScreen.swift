@@ -102,7 +102,7 @@ struct VoiceScreen: View {
     var audioPlayerSection: some View {
         VStack(spacing: 10) {
             RoundedRectangle(cornerRadius: 16)
-                .fill(Color("DarkText"))
+                .fill(Color("DarkTextColor"))
                 .frame(height: 140)
                 .overlay(
                     ScrollView {

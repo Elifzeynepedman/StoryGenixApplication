@@ -39,18 +39,24 @@ struct MainTabView: View {
             }
             .tag(1)
 
-            // Settings Tab
-            NavigationStack {
+            // ✅ Fixed Settings Tab
+            NavigationStack(path: $router.path) {
                 SettingsScreen()
+                    .environment(router)
+                    .environmentObject(projectViewModel)
+                    .navigationDestination(for: Route.self) { route in
+                        routeView(for: route)
+                            .environment(router)
+                            .environmentObject(projectViewModel)
+                    }
             }
             .tabItem {
                 Label("Settings", systemImage: "gear")
             }
             .tag(2)
         }
-        // ✅ Reset navigation path when switching to Projects tab
-        .onChange(of: selectedTab) { tab in
-            if tab == 1 {
+        .onChange(of: selectedTab) {
+            if selectedTab == 1 {
                 router.goToHome()
             }
         }
@@ -71,5 +77,10 @@ struct MainTabView: View {
             VideoPreviewScreen(project: project)
         case .videocomplete(let project):
             VideoCompleteScreen(project: project)
+        case .appSettings:
+            AppSettingsScreen()
+        case .contact:
+            ContactScreen()
         }
-    }}
+    }
+}

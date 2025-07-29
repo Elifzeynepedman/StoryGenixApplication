@@ -6,9 +6,16 @@
 //
 
 import SwiftUI
+import Firebase
+
 
 @main
 struct StoryGenixAppApp: App {
+    
+    init() {
+        FirebaseApp.configure()
+    }
+
     var body: some Scene {
         WindowGroup {
             MainTabView()
@@ -16,3 +23,4 @@ struct StoryGenixAppApp: App {
     }
 }
 
+ 

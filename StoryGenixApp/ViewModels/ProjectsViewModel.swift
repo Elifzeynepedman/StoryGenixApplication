@@ -67,4 +67,7 @@ class ProjectsViewModel: ObservableObject {
         }
         route(project)
     }
+    func resetProjects() {
+        allProjects.removeAll()
+    }
 }

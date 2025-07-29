@@ -158,7 +158,7 @@ struct VideoPreviewScreen: View {
                 progressStep: 3
             )
 
-            if let index = projectViewModel.allProjects.firstIndex(where: { $0.id == draft.id }) {
+            if projectViewModel.allProjects.contains(where: { $0.id == draft.id }) {
                 projectViewModel.updateProject(draft)
             } else {
                 projectViewModel.addProject(draft)
