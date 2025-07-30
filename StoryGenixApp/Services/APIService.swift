@@ -52,10 +52,11 @@ struct RandomTopicResponse: Codable {
 struct SceneResponse: Codable {
     let index: Int
     let text: String
+    let imagePrompt: String
+    let klingPrompt: String
 }
-
 struct CreateScriptResponse: Codable {
-    let projectId: String
+    let projectId: String?
     let script: String
     let scenes: [SceneResponse]
     let message: String

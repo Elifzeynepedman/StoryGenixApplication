@@ -1,10 +1,3 @@
-//
-//  VideoProject.swift
-//  StoryGenix
-//
-//  Created by Elif Edman on 2.07.2025.
-//
-
 import Foundation
 
 struct VideoProject: Identifiable, Codable, Hashable {
@@ -13,7 +6,9 @@ struct VideoProject: Identifiable, Codable, Hashable {
     var script: String
     var thumbnail: String
     var scenes: [VideoScene]
-    var sceneDescriptions: [String] // ✅ Use this for image prompts
+    var sceneDescriptions: [String]
+    var imagePrompts: [String]
+    var klingPrompts: [String] // ✅ Added property
     var isCompleted: Bool
     var progressStep: Int
     var currentSceneIndex: Int? = nil
@@ -25,7 +20,9 @@ struct VideoProject: Identifiable, Codable, Hashable {
         script: String = "",
         thumbnail: String,
         scenes: [VideoScene] = [],
-        sceneDescriptions: [String] = [], // ✅ Add default empty
+        sceneDescriptions: [String] = [],
+        imagePrompts: [String] = [],
+        klingPrompts: [String] = [], // ✅ Added parameter
         isCompleted: Bool,
         progressStep: Int,
         currentSceneIndex: Int? = nil
@@ -35,7 +32,9 @@ struct VideoProject: Identifiable, Codable, Hashable {
         self.script = script
         self.thumbnail = thumbnail
         self.scenes = scenes
-        self.sceneDescriptions = sceneDescriptions // ✅ Assign here
+        self.sceneDescriptions = sceneDescriptions
+        self.imagePrompts = imagePrompts
+        self.klingPrompts = klingPrompts // ✅ FIX HERE
         self.isCompleted = isCompleted
         self.progressStep = progressStep
         self.currentSceneIndex = currentSceneIndex

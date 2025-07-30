@@ -16,22 +16,14 @@ class ImageViewModel: ObservableObject {
     @Published var selectedImageIndices: [Int?] = []
 
     /// Load scenes with script lines and LLM-generated scene details
-    func loadScenes(from script: String, sceneDetails: [String], existingSelections: [Int?] = []) {
-        let lines = script
-            .components(separatedBy: "\n")
-            .filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
-
-        self.scenes = lines.enumerated().map { index, line in
-            let cleanLine = line.trimmingCharacters(in: .whitespaces)
-            let detail = index < sceneDetails.count ? sceneDetails[index].trimmingCharacters(in: .whitespaces) : cleanLine
-
-            let prompt = "Highly detailed cinematic illustration of: \(detail). Sharp lighting, vibrant colors, depth, photorealistic, ultra-realistic texture."
-            
-            return ImageScene(sceneText: cleanLine, prompt: prompt)
+    func loadScenes(from script: String, sceneDetails: [String], prompts: [String], existingSelections: [Int?] = []) {
+        self.scenes = sceneDetails.enumerated().map { index, desc in
+            let prompt = index < prompts.count ? prompts[index] : "Highly detailed cinematic illustration of \(desc)"
+            return ImageScene(sceneText: desc, prompt: prompt)
         }
-
         restoreSelections(existingSelections)
     }
+
 
     /// Restore previously selected images if any
     private func restoreSelections(_ existingSelections: [Int?]) {

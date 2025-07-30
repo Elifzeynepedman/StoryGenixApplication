@@ -18,192 +18,245 @@ struct ContentView: View {
     @State private var micPulse = false
     @State private var isLoadingSurprise = false
 
+    // ✅ Suggested Ideas
+    let suggestedIdeas = [
+        "The Eye of a Storm",
+        "A Robot Learns to Paint",
+        "The Lost Temple of Sound"
+    ]
+
     var body: some View {
-        ZStack {
-            Image("BackgroundImage")
-                .resizable()
-                .scaledToFill()
-                .ignoresSafeArea()
+        NavigationStack {
+            ZStack {
+                // ✅ Background Image
+                Image("BackgroundImage")
+                    .resizable()
+                    .scaledToFill()
+                    .ignoresSafeArea()
 
-            VStack(spacing: 4) {
-                // Title
-                HStack {
-                    Text("StoryGenIX")
-                        .font(.system(size: 40, weight: .bold))
-                        .foregroundStyle(.white)
-                    Image(systemName: "star.fill")
-                        .foregroundStyle(Color.pink)
-                }
+                VStack(spacing: 24) {
+                    // ✅ App Branding
+                    VStack(spacing: 6) {
+                        Text("StoryGenix")
+                            .font(.system(size: 44, weight: .bold))
+                            .foregroundColor(.white)
+                            .shadow(radius: 4)
+                        Text("Create stunning videos in seconds")
+                            .font(.subheadline)
+                            .foregroundColor(.white.opacity(0.85))
+                    }
+                    .padding(.top, 50)
 
-                // Subtitle
-                HStack(spacing: 30) {
-                    Text("One Topic")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundStyle(.white)
-                    Text("Script, Voice, Images, Video")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundStyle(.white)
-                }
-                .padding(.bottom, 60)
+                    // ✅ Input Section
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("What video would you like to create?")
+                            .font(.headline)
+                            .foregroundColor(.white)
 
-                // Input Card
-                VStack(spacing: 14) {
-                    Text("What video would you like to create?")
-                        .font(.system(size: 24, weight: .bold))
-                        .foregroundStyle(.white)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 3)
-
-                    Spacer()
-
-                    // Input + Mic Button
-                    HStack(alignment: .top, spacing: 8) {
                         ZStack(alignment: .topLeading) {
                             if topic.isEmpty {
                                 Text("Describe your topic here...")
-                                    .foregroundColor(.white.opacity(0.8))
-                                    .padding(14)
+                                    .foregroundColor(.white.opacity(0.6))
+                                    .padding(.top, 14)
+                                    .padding(.horizontal, 8)
                             }
 
                             TextEditor(text: $topic)
-                                .foregroundColor(.white)
-                                .padding(10)
-                                .frame(height: 100)
-                                .background(Color.clear)
                                 .scrollContentBackground(.hidden)
-                        }
-
-                        Button(action: {
-                            if speechRecognizer.isRecording {
-                                speechRecognizer.stopTranscribing()
-                            } else {
-                                speechRecognizer.transcript = topic // sync current input
-                                speechRecognizer.requestAuthorization { granted in
-                                    if granted {
-                                        try? speechRecognizer.startTranscribing()
+                                .frame(height: 100)
+                                .foregroundColor(.white)
+                                .padding(.leading, 8)
+                                .padding(.trailing, 40) // ✅ Extra space for mic button
+                                .background(
+                                    ZStack {
+                                        Color.black.opacity(0.3)
+                                        LinearGradient(
+                                            colors: [
+                                                Color("BackgroundGradientDark").opacity(0.2),
+                                                Color("BackgroundGradientPurple").opacity(0.15)
+                                            ],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
                                     }
-                                }
-                            }
-                        }) {
-                            ZStack {
-                                if speechRecognizer.isRecording {
-                                    Circle()
-                                        .fill(Color("DarkText").opacity(0.4))
-                                        .frame(width: 34, height: 34)
-                                        .scaleEffect(micPulse ? 1.2 : 0.8)
-                                        .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: micPulse)
-                                }
-
-                                Image(systemName: "mic.fill")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 20, height: 20)
-                                    .foregroundColor(.white.opacity(0.85))
-                            }
-                            .padding(.top, 12)
-                            .padding(.trailing, 6)
+                                )
+                                .clipShape(RoundedRectangle(cornerRadius: 18))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 18)
+                                        .stroke(Color.white.opacity(0.15), lineWidth: 1)
+                                )
+                                .shadow(color: .black.opacity(0.4), radius: 8, x: 0, y: 4)
+                                .overlay(
+                                    HStack {
+                                        Spacer()
+                                        Button(action: toggleMic) {
+                                            Image(systemName: speechRecognizer.isRecording ? "stop.circle.fill" : "mic.fill")
+                                                .foregroundColor(speechRecognizer.isRecording ? .white : .gray)
+                                                .padding()
+                                        }
+                                    }
+                                )
                         }
                     }
-                    .frame(height: 100)
-                    .padding(.horizontal, 10)
-                    .background(
-                        LinearGradient(
-                            gradient: Gradient(colors: [
-                                Color("BackgroundGradientDark"),
-                                Color("BackgroundGradientPurple"),
-                                Color("BackgroundGradientNavy")
-                            ]),
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                        .opacity(0.4)
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 20)
-                            .stroke(Color.white, lineWidth: 0.5)
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
-                    .padding(.horizontal, 30)
-                    .padding(.top, -20)
+                    .padding(.horizontal, 24)
 
-                    // ✅ Surprise Me Button with API Call
+                    // ✅ Surprise Me Button
                     Button(action: {
                         Task { await fetchSurpriseTopic() }
                     }) {
-                        HStack(spacing: 6) {
-                            if isLoadingSurprise {
-                                ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                            } else {
+                        if isLoadingSurprise {
+                            ProgressView().tint(.white)
+                        } else {
+                            HStack(spacing: 6) {
                                 Image(systemName: "sparkles")
                                 Text("Surprise Me")
                             }
+                            .foregroundColor(.white.opacity(0.9))
+                            .font(.subheadline)
                         }
-                        .font(.subheadline)
-                        .foregroundColor(.white.opacity(0.85))
                     }
+                    .padding(.top, 8)
 
-                    // Generate Video Button
-                    Button(action: {
-                        let trimmed = topic.trimmingCharacters(in: .whitespacesAndNewlines)
-                        if trimmed.isEmpty {
-                            showEmptyError = true
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                showEmptyError = false
-                            }
-                        } else {
-                            router.goToScript(topic: trimmed)
-                        }
-                    }) {
+                    // ✅ Generate Video Button
+                    Button(action: generateVideo) {
                         Text("Generate Video")
                             .font(.headline)
-                            .foregroundStyle(Color.white)
+                            .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .padding()
                             .background(
                                 LinearGradient(
-                                    gradient: Gradient(colors: [
+                                    colors: [
                                         Color("ButtonGradient1"),
                                         Color("ButtonGradient2"),
                                         Color("ButtonGradient3")
-                                    ]),
+                                    ],
                                     startPoint: .leading,
                                     endPoint: .trailing
                                 )
                             )
-                            .clipShape(.rect(cornerRadius: 18))
-                            .shadow(color: .black.opacity(0.07), radius: 4, x: 0, y: 2)
+                            .clipShape(RoundedRectangle(cornerRadius: 18))
+                            .shadow(color: .black.opacity(0.25), radius: 6, x: 0, y: 4)
                     }
-                    .padding(.top, 10)
-                    .padding(.horizontal, 30)
+                    .padding(.horizontal)
 
-                    // Error Message
                     if showEmptyError {
-                        Text("Please enter a topic or generate one.")
-                            .font(.caption)
+                        Text("Please enter a topic or pick one.")
+                            .font(.footnote)
                             .foregroundColor(.red)
-                            .padding(.top, 4)
                     }
+
+                    // ✅ Suggested Ideas BELOW Button
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Need inspiration?")
+                            .font(.subheadline)
+                            .foregroundColor(.white.opacity(0.9))
+
+                        HStack(spacing: 12) {
+                            ForEach(suggestedIdeas.prefix(2), id: \.self) { idea in
+                                suggestionButton(title: idea)
+                            }
+                        }
+                        HStack {
+                            suggestionButton(title: suggestedIdeas[2])
+                            Spacer()
+                        }
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.top, 12)
 
                     Spacer()
                 }
-                .frame(width: 350, height: 320)
-                .padding(.top, 40)
-                .background(Color.white.opacity(0.08))
-                .cornerRadius(28)
-                .padding(.horizontal)
+                .padding(.bottom, 40)
             }
-        }
-        .frame(maxHeight: .infinity, alignment: .center)
-        .onReceive(speechRecognizer.$transcript) { live in
-            topic = live
-        }
-        .onChange(of: speechRecognizer.isRecording) { isRecording in
-            micPulse = isRecording
+            .navigationBarHidden(true)
+            .onReceive(speechRecognizer.$transcript) { live in
+                topic = live
+            }
+            .onChange(of: speechRecognizer.isRecording) { isRecording in
+                micPulse = isRecording
+            }
         }
     }
 
-    // ✅ Fetch surprise topic from backend
+    // ✅ Suggestion Button with Full Idea
+    private func suggestionButton(title: String) -> some View {
+        Text(title)
+            .font(.footnote)
+            .foregroundColor(.white.opacity(0.95))
+            .padding(.vertical, 8)
+            .padding(.horizontal, 14)
+            .background(Color.black.opacity(0.25))
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(
+                        LinearGradient(
+                            colors: [
+                                Color("ButtonGradient1"),
+                                Color("ButtonGradient2"),
+                                Color("ButtonGradient3")
+                            ],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        ),
+                        lineWidth: 1
+                    )
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .onTapGesture {
+                topic = ideaFor(title: title) // ✅ Fill full story idea
+            }
+    }
+
+    // ✅ Map Title → Full Idea Text
+    private func ideaFor(title: String) -> String {
+        switch title {
+        case "The Eye of a Storm":
+            return """
+            A lone sailor battles fierce winds as the storm's eye approaches.
+            Waves crash against his small boat while lightning illuminates the dark sky.
+            Will he survive the wrath of nature?
+            """
+        case "A Robot Learns to Paint":
+            return """
+            In a futuristic studio, a robot picks up a paintbrush for the first time.
+            Confused yet determined, it creates strokes that express a hidden spark of creativity.
+            """
+        case "The Lost Temple of Sound":
+            return """
+            Deep in the jungle, an explorer discovers a temple that hums with ancient melodies.
+            Each note unlocks secrets of a forgotten civilization.
+            """
+        default:
+            return title
+        }
+    }
+
+    // ✅ Mic Toggle
+    private func toggleMic() {
+        if speechRecognizer.isRecording {
+            speechRecognizer.stopTranscribing()
+        } else {
+            speechRecognizer.transcript = topic
+            speechRecognizer.requestAuthorization { granted in
+                if granted { try? speechRecognizer.startTranscribing() }
+            }
+        }
+    }
+
+    // ✅ Generate Video Action
+    private func generateVideo() {
+        let trimmed = topic.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.isEmpty {
+            showEmptyError = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) { showEmptyError = false }
+        } else {
+            router.goToScript(topic: trimmed)
+        }
+    }
+
+    // ✅ Surprise Me API or Fallback
+    @MainActor
     private func fetchSurpriseTopic() async {
         isLoadingSurprise = true
         do {
@@ -220,6 +273,7 @@ struct ContentView: View {
             showEmptyError = false
         } catch {
             print("❌ Error fetching surprise topic: \(error)")
+            topic = ideaFor(title: suggestedIdeas.randomElement() ?? "The Eye of a Storm") // ✅ Fallback
         }
         isLoadingSurprise = false
     }
@@ -228,4 +282,3 @@ struct ContentView: View {
 #Preview {
     ContentView().environment(Router())
 }
-

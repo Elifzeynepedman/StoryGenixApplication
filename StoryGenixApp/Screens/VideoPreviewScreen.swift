@@ -4,7 +4,6 @@ import Combine
 
 struct VideoPreviewScreen: View {
     let project: VideoProject
-    
 
     @StateObject private var viewModel = VideoPreviewViewModel()
     @State private var player = AVPlayer()
@@ -36,7 +35,7 @@ struct VideoPreviewScreen: View {
 
                             ScriptPromptSection(
                                 sceneText: currentScene.sceneText,
-                                prompt: currentScene.prompt,
+                                prompt: currentScene.prompt, // ✅ Now Kling prompt
                                 sceneIndex: viewModel.currentSceneIndex,
                                 totalScenes: viewModel.scenes.count,
                                 onUpdatePrompt: { newPrompt in
@@ -53,13 +52,9 @@ struct VideoPreviewScreen: View {
                                 },
                                 onNext: {
                                     if currentScene.videoURL == nil {
-                                        withAnimation {
-                                            showSelectionWarning = true
-                                        }
+                                        withAnimation { showSelectionWarning = true }
                                         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                            withAnimation {
-                                                showSelectionWarning = false
-                                            }
+                                            withAnimation { showSelectionWarning = false }
                                         }
                                     } else if viewModel.currentSceneIndex < viewModel.scenes.count - 1 {
                                         viewModel.currentSceneIndex += 1
@@ -104,13 +99,9 @@ struct VideoPreviewScreen: View {
 
                                     Button("Next →") {
                                         if currentScene.videoURL == nil {
-                                            withAnimation {
-                                                showSelectionWarning = true
-                                            }
+                                            withAnimation { showSelectionWarning = true }
                                             DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                                withAnimation {
-                                                    showSelectionWarning = false
-                                                }
+                                                withAnimation { showSelectionWarning = false }
                                             }
                                         } else if viewModel.currentSceneIndex < viewModel.scenes.count - 1 {
                                             viewModel.currentSceneIndex += 1
@@ -129,14 +120,20 @@ struct VideoPreviewScreen: View {
                                             script: project.script,
                                             thumbnail: viewModel.scenes.first?.previewImage ?? "defaultThumbnail",
                                             scenes: viewModel.scenes,
+                                            sceneDescriptions: project.sceneDescriptions,
+                                            imagePrompts: project.imagePrompts,
+                                            klingPrompts: project.klingPrompts,
                                             isCompleted: true,
                                             progressStep: 4
                                         )
                                         updated.currentSceneIndex = viewModel.currentSceneIndex
 
-                                        projectViewModel.upsertAndNavigate(updated) { router.goToVideoComplete(project: $0) }
+                                        projectViewModel.upsertAndNavigate(updated) {
+                                            router.goToVideoComplete(project: $0)
+                                        }
                                     }
-                                    .padding(.horizontal, 30)                                }
+                                    .padding(.horizontal, 30)
+                                }
                             }
                         }
 
@@ -146,7 +143,12 @@ struct VideoPreviewScreen: View {
             }
         }
         .onAppear {
-            viewModel.loadScenes(from: project.script)
+            viewModel.loadScenes(
+                script: project.script,
+                descriptions: project.sceneDescriptions,
+                klingPrompts: project.klingPrompts, // ✅ Using Kling prompts
+                existingSelections: project.selectedImageIndices.map { $0.value }
+            )
 
             let draft = VideoProject(
                 id: project.id,
@@ -154,6 +156,9 @@ struct VideoPreviewScreen: View {
                 script: project.script,
                 thumbnail: viewModel.scenes.first?.previewImage ?? "defaultThumbnail",
                 scenes: viewModel.scenes,
+                sceneDescriptions: project.sceneDescriptions,
+                imagePrompts: project.imagePrompts,
+                klingPrompts: project.klingPrompts,
                 isCompleted: false,
                 progressStep: 3
             )
@@ -167,7 +172,6 @@ struct VideoPreviewScreen: View {
     }
 }
 
-
 #Preview {
     let sampleProject = VideoProject(
         title: "How Eyes Work",
@@ -176,6 +180,9 @@ struct VideoPreviewScreen: View {
         It captures light, interprets color, and helps us understand the world around us.
         """,
         thumbnail: "defaultThumbnail",
+        sceneDescriptions: ["Scene 1", "Scene 2"],
+        imagePrompts: ["Image Prompt 1", "Image Prompt 2"],
+        klingPrompts: ["Kling Prompt 1", "Kling Prompt 2"],
         isCompleted: false,
         progressStep: 3
     )

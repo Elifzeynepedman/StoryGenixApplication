@@ -9,28 +9,45 @@ import SwiftUI
 
 struct PrimaryGradientButton: View {
     let title: String
-    let isLoading: Bool
-    let action: () -> Void
+    var isLoading: Bool = false
+    var action: () -> Void
 
     var body: some View {
-        Button(action: action) {
-            if isLoading {
-                ProgressView()
-                    .frame(height: 48)
-                    .frame(maxWidth: .infinity)
-            } else {
-                Text(title)
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .frame(height: 48)
-                    .frame(maxWidth: .infinity)
-                    .background(
-                        LinearGradient(colors: [Color.purple, Color.pink],
-                                       startPoint: .leading, endPoint: .trailing)
+        Button(action: {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                action()
+            }
+        }) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 18)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color("ButtonGradient1"),
+                                Color("ButtonGradient2"),
+                                Color("ButtonGradient3")
+                            ],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
                     )
+                    .frame(height: 55)
+                    .shadow(color: Color.black.opacity(0.25), radius: 8, x: 0, y: 4)
+
+                if isLoading {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                } else {
+                    Text(title)
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .shadow(color: Color.black.opacity(0.4), radius: 1, x: 0, y: 1)
+                }
             }
         }
-        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .frame(maxWidth: 340) // ✅ Apple-like size
+        .padding(.vertical, 8)
+        .scaleEffect(isLoading ? 1.0 : 1.02)
+        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isLoading)
     }
 }
-

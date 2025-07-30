@@ -50,10 +50,10 @@ struct ImageScreen: View {
                 project.selectedImageIndices[index]
             }
 
-            // Use detailed scenes instead of script lines only
             viewModel.loadScenes(
                 from: project.script,
-                sceneDetails: project.sceneDescriptions, // ✅ Use this
+                sceneDetails: project.sceneDescriptions,
+                prompts: project.imagePrompts,
                 existingSelections: restoredSelections
             )
 

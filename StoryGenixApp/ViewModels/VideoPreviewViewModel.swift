@@ -13,17 +13,13 @@ class VideoPreviewViewModel: ObservableObject {
     @Published var currentSceneIndex = 0
     @Published var isLoading = false
 
-    func loadScenes(from script: String) {
-        let lines = script
-            .components(separatedBy: .newlines)
-            .filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
-
-        self.scenes = lines.map {
-            VideoScene(sceneText: $0, prompt: $0, videoURL: nil, previewImage: "PlaceholderImage")
+    func loadScenes(script: String, descriptions: [String], klingPrompts: [String], existingSelections: [Int?] = []) {
+        self.scenes = descriptions.enumerated().map { index, desc in
+            let prompt = index < klingPrompts.count ? klingPrompts[index] : "Default Kling animation instruction for \(desc)"
+            return VideoScene(sceneText: desc, prompt: prompt, videoURL: nil, previewImage: "defaultThumbnail")
         }
-        self.currentSceneIndex = 0
     }
-
+    
     func updatePrompt(for index: Int, newPrompt: String) {
         guard scenes.indices.contains(index) else { return }
         scenes[index].prompt = newPrompt
@@ -39,7 +35,7 @@ class VideoPreviewViewModel: ObservableObject {
                 self.scenes[index].videoURL = url
                 print("✅ Video generated for scene \(index)")
             } else {
-                print("❌ Efes.mp4 not found in bundle.")
+                print("❌ EfesVideo.mp4 not found in bundle.")
             }
             self.isLoading = false
         }
