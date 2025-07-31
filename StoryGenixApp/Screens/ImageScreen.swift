@@ -5,6 +5,10 @@ struct ImageScreen: View {
     @StateObject private var viewModel = ImageViewModel()
     @State private var showSelectionWarning = false
     
+    @Environment(Router.self) private var router
+    @EnvironmentObject private var projectViewModel: ProjectsViewModel
+
+    
     var body: some View {
         ZStack {
             Image("BackgroundImage")
@@ -107,9 +111,20 @@ struct ImageScreen: View {
                                     }
                                 } else {
                                     PrimaryGradientButton(title: "Continue to Video", isLoading: false) {
-                                        print("Continue to Video step")
-                                        // Navigation to video screen here
+                                        var updated = project
+                                        updated.progressStep = 3
+                                        updated.selectedImageIndices = viewModel.selectedImageIndices.enumerated().reduce(into: [:]) { dict, tuple in
+                                            if let selectedIndex = tuple.element {
+                                                dict[tuple.offset] = selectedIndex
+                                            }
+                                        }
+                                        updated.currentSceneIndex = viewModel.currentSceneIndex
+
+                                        projectViewModel.upsertAndNavigate(updated) {
+                                            router.goToVideoPreview(project: $0)
+                                        }
                                     }
+
                                 }
                             }
                             .padding(.horizontal)
