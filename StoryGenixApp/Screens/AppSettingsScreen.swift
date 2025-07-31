@@ -14,46 +14,61 @@ struct AppSettingsScreen: View {
 
     var body: some View {
         ZStack {
+            // Background (same as Settings screen)
             Image("BackgroundImage")
                 .resizable()
                 .scaledToFill()
                 .ignoresSafeArea()
 
-            VStack(spacing: 24) {
-                HStack {
-                    Button("Back") {
-                        router.path.removeLast()
+            ScrollView {
+                VStack(spacing: 28) {
+                    // Header
+                    HStack {
+                        Button(action: { router.path.removeLast() }) {
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundColor(.white)
+                            Text("Back")
+                                .foregroundColor(.white)
+                        }
+                        Spacer()
                     }
-                    .foregroundColor(.white.opacity(0.7))
-                    Spacer()
+                    .padding(.horizontal)
+                    .padding(.top, 12)
+
+                    VStack(spacing: 4) {
+                        Text("App Settings")
+                            .font(.system(size: 32, weight: .bold))
+                            .foregroundColor(.white)
+                        Text("Manage storage and app info")
+                            .font(.footnote)
+                            .foregroundColor(.white.opacity(0.7))
+                    }
+                    .padding(.bottom, 20)
+
+                    // Storage Section
+                    settingsSection(title: "STORAGE") {
+                        settingsRow(icon: "trash.circle.fill", title: "Clear Cache") {
+                            print("🧹 Clear Cache tapped")
+                        }
+
+                        settingsRow(icon:  "info.circle.fill",  title: "Reset Projects") {
+                            showResetConfirmation = true
+                        }
+                    }
+
+                    // Info Section
+                    settingsSection(title: "INFO") {
+                        settingsRowWithTrailing(icon: "info.circle.fill", title: "App Version") {
+                            Text(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")
+                                .foregroundColor(.white.opacity(0.8))
+                        }
+                    }
+
+                    Spacer(minLength: 40)
                 }
                 .padding(.horizontal)
-
-                Text("VidGenius")
-                    .font(.system(size: 24, weight: .bold))
-                    .foregroundColor(.white)
-
-                Text("App Settings")
-                    .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(.white)
-
-                appSettingButton("Clear Cache", action:  {
-                    print("🧹 Clear Cache tapped")
-                    // Add cache clearing logic if needed
-                })
-
-                appSettingButton("Reset Projects", action:  {
-                    showResetConfirmation = true
-                })
-
-                appSettingButton("App Version", trailing: {
-                    Text(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")
-                        .foregroundColor(.gray)
-                }, isDisabled: true)
-
-                Spacer()
             }
-            .padding()
         }
         .navigationBarBackButtonHidden(true)
         .alert("Reset All Projects?", isPresented: $showResetConfirmation) {
@@ -64,30 +79,57 @@ struct AppSettingsScreen: View {
         }
     }
 
-    @ViewBuilder
-    private func appSettingButton(
-        _ title: String,
-        trailing: (() -> Text)? = nil,
-        isDisabled: Bool = false,
-        action: (() -> Void)? = nil
-    ) -> some View {
-        Button(action: { action?() }) {
-            HStack {
+    // MARK: - Reusable Components (Same as Settings Screen)
+
+    private func settingsSection(title: String, @ViewBuilder content: () -> some View) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(title)
+                .font(.caption)
+                .foregroundColor(.white.opacity(0.6))
+                .padding(.horizontal)
+            content()
+        }
+    }
+
+    private func settingsRow(icon: String, title: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 12) {
+                Image(systemName: icon)
+                    .font(.system(size: 18))
+                    .foregroundColor(.white)
+                    .frame(width: 30)
+
                 Text(title)
                     .foregroundColor(.white)
-                    .fontWeight(.medium)
+                    .font(.system(size: 16, weight: .medium))
+
                 Spacer()
-                trailing?()
+                Image(systemName: "chevron.right")
+                    .foregroundColor(.white.opacity(0.4))
             }
             .padding()
-            .background(Color.white.opacity(0.1))
-            .cornerRadius(12)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.white.opacity(0.1), lineWidth: 1)
-            )
+            .background(.ultraThinMaterial)
+            .clipShape(RoundedRectangle(cornerRadius: 14))
         }
-        .disabled(isDisabled)
+    }
+
+    private func settingsRowWithTrailing(icon: String, title: String, @ViewBuilder trailing: () -> some View) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 18))
+                .foregroundColor(.white)
+                .frame(width: 30)
+
+            Text(title)
+                .foregroundColor(.white)
+                .font(.system(size: 16, weight: .medium))
+
+            Spacer()
+            trailing()
+        }
+        .padding()
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 14))
     }
 }
 
@@ -96,3 +138,4 @@ struct AppSettingsScreen: View {
         .environment(Router())
         .environmentObject(ProjectsViewModel())
 }
+

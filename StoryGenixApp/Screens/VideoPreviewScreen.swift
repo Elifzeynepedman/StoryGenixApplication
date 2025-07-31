@@ -14,139 +14,63 @@ struct VideoPreviewScreen: View {
 
     var body: some View {
         ZStack {
+            // ✅ Background
             Image("BackgroundImage")
                 .resizable()
                 .scaledToFill()
                 .ignoresSafeArea()
 
             VStack(spacing: 20) {
-                Text("StoryGenix")
-                    .font(.system(size: 24, weight: .bold))
-                    .foregroundColor(.white)
+                // ✅ Header
+                VStack(spacing: 6) {
+                    Text("My AI Director")
+                        .font(.system(size: 36, weight: .bold))
+                        .foregroundColor(.white)
+                    Text("Preview Your Video")
+                        .font(.title2.bold())
+                        .foregroundColor(.white.opacity(0.9))
+                }
+                .padding(.top, 40)
 
-                Text("Preview Your Video")
-                    .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(.white)
-
+                // ✅ Scrollable Content
                 ScrollView(showsIndicators: false) {
-                    VStack(spacing: 20) {
+                    VStack(spacing: 24) {
                         if viewModel.scenes.indices.contains(viewModel.currentSceneIndex) {
                             let currentScene = viewModel.scenes[viewModel.currentSceneIndex]
 
-                            ScriptPromptSection(
-                                sceneText: currentScene.sceneText,
-                                prompt: currentScene.prompt, // ✅ Now Kling prompt
-                                sceneIndex: viewModel.currentSceneIndex,
-                                totalScenes: viewModel.scenes.count,
-                                onUpdatePrompt: { newPrompt in
-                                    viewModel.updatePrompt(for: viewModel.currentSceneIndex, newPrompt: newPrompt)
-                                },
-                                onGenerate: {
-                                    viewModel.generateVideo(for: viewModel.currentSceneIndex)
-                                },
-                                onPrevious: {
-                                    if viewModel.currentSceneIndex > 0 {
-                                        viewModel.currentSceneIndex -= 1
-                                        showSelectionWarning = false
-                                    }
-                                },
-                                onNext: {
-                                    if currentScene.videoURL == nil {
-                                        withAnimation { showSelectionWarning = true }
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                            withAnimation { showSelectionWarning = false }
-                                        }
-                                    } else if viewModel.currentSceneIndex < viewModel.scenes.count - 1 {
-                                        viewModel.currentSceneIndex += 1
-                                    }
-                                },
-                                canGoPrevious: viewModel.currentSceneIndex > 0,
-                                canGoNext: viewModel.currentSceneIndex < viewModel.scenes.count - 1,
-                                isLoading: viewModel.isLoading,
-                                shouldShowNavigation: true,
-                                generateButtonTitle: currentScene.videoURL == nil ? "Generate Video" : "Regenerate Video"
-                            )
-
-                            if showSelectionWarning {
-                                Text("Please generate video before continuing.")
-                                    .font(.system(size: 14, weight: .bold))
-                                    .foregroundColor(.red)
-                                    .transition(.opacity)
-                                    .padding(.top, -6)
-                            }
-
-                            if let videoURL = currentScene.videoURL {
-                                VideoPlayer(player: player)
-                                    .frame(height: 300)
-                                    .padding(.horizontal, 55)
-                                    .cornerRadius(12)
-                                    .padding()
-                                    .onReceive(Just(videoURL)) { url in
-                                        player.replaceCurrentItem(with: AVPlayerItem(url: url))
-                                        player.play()
-                                    }
-
-                                HStack {
-                                    Button("← Previous") {
-                                        if viewModel.currentSceneIndex > 0 {
-                                            viewModel.currentSceneIndex -= 1
-                                            showSelectionWarning = false
-                                        }
-                                    }
-                                    .disabled(viewModel.currentSceneIndex == 0)
-
-                                    Spacer()
-
-                                    Button("Next →") {
-                                        if currentScene.videoURL == nil {
-                                            withAnimation { showSelectionWarning = true }
-                                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                                withAnimation { showSelectionWarning = false }
-                                            }
-                                        } else if viewModel.currentSceneIndex < viewModel.scenes.count - 1 {
-                                            viewModel.currentSceneIndex += 1
-                                        }
-                                    }
-                                    .disabled(viewModel.currentSceneIndex >= viewModel.scenes.count - 1)
-                                }
-                                .padding(.horizontal, 40)
-                                .foregroundColor(.white)
-
-                                if viewModel.currentSceneIndex == viewModel.scenes.count - 1 {
-                                    SecondaryActionButton(title: "Continue to Final") {
-                                        var updated = VideoProject(
-                                            id: project.id,
-                                            title: project.title,
-                                            script: project.script,
-                                            thumbnail: viewModel.scenes.first?.previewImage ?? "defaultThumbnail",
-                                            scenes: viewModel.scenes,
-                                            sceneDescriptions: project.sceneDescriptions,
-                                            imagePrompts: project.imagePrompts,
-                                            klingPrompts: project.klingPrompts,
-                                            isCompleted: true,
-                                            progressStep: 4
-                                        )
-                                        updated.currentSceneIndex = viewModel.currentSceneIndex
-
-                                        projectViewModel.upsertAndNavigate(updated) {
-                                            router.goToVideoComplete(project: $0)
-                                        }
-                                    }
-                                    .padding(.horizontal, 30)
-                                }
-                            }
+                            sceneSection(for: currentScene)
                         }
 
                         Spacer(minLength: 40)
                     }
+                    .padding(.horizontal)
                 }
+            }
+
+            // ✅ Floating Toast Alert
+            if showSelectionWarning {
+                VStack {
+                    Spacer()
+                    Text("Please generate the video to continue")
+                        .font(.subheadline)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 12)
+                        .background(.ultraThinMaterial)
+                        .cornerRadius(12)
+                        .shadow(radius: 4)
+                        .padding(.bottom, 40)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+                .animation(.easeInOut, value: showSelectionWarning)
             }
         }
         .onAppear {
+            // ✅ Load scenes and update draft
             viewModel.loadScenes(
                 script: project.script,
                 descriptions: project.sceneDescriptions,
-                klingPrompts: project.klingPrompts, // ✅ Using Kling prompts
+                klingPrompts: project.klingPrompts,
                 existingSelections: project.selectedImageIndices.map { $0.value }
             )
 
@@ -170,24 +94,154 @@ struct VideoPreviewScreen: View {
             }
         }
     }
-}
 
-#Preview {
-    let sampleProject = VideoProject(
-        title: "How Eyes Work",
-        script: """
-        The human eye is one of the most extraordinary organs in the body.
-        It captures light, interprets color, and helps us understand the world around us.
-        """,
-        thumbnail: "defaultThumbnail",
-        sceneDescriptions: ["Scene 1", "Scene 2"],
-        imagePrompts: ["Image Prompt 1", "Image Prompt 2"],
-        klingPrompts: ["Kling Prompt 1", "Kling Prompt 2"],
-        isCompleted: false,
-        progressStep: 3
-    )
+    @ViewBuilder
+    private func sceneSection(for currentScene: VideoScene) -> some View {
+        VStack(spacing: 16) {
+            // ✅ Unified Glass Panel
+            VStack(alignment: .leading, spacing: 14) {
+                // Scene info
+                Text("Scene \(viewModel.currentSceneIndex + 1) of \(viewModel.scenes.count)")
+                    .font(.caption)
+                    .foregroundColor(.white.opacity(0.8))
 
-    return VideoPreviewScreen(project: sampleProject)
-        .environment(Router())
-        .environmentObject(ProjectsViewModel())
+                Text(currentScene.sceneText)
+                    .font(.headline)
+                    .foregroundColor(.white)
+
+                // Kling prompt editor
+                TextEditor(text: Binding(
+                    get: { currentScene.prompt },
+                    set: { newPrompt in
+                        viewModel.updatePrompt(for: viewModel.currentSceneIndex, newPrompt: newPrompt)
+                    }
+                ))
+                .scrollContentBackground(.hidden)
+                .frame(height: 80)
+                .foregroundColor(.white)
+                .padding(8)
+                .background(Color.black.opacity(0.25))
+                .clipShape(RoundedRectangle(cornerRadius: 14))
+
+                // Generate / Regenerate button
+                if currentScene.videoURL == nil {
+                    PrimaryGradientButton(title: "Generate Video", isLoading: viewModel.isLoading) {
+                        viewModel.generateVideo(for: viewModel.currentSceneIndex)
+                    }
+                } else {
+                    HStack {
+                        Spacer()
+                        Button {
+                            viewModel.generateVideo(for: viewModel.currentSceneIndex)
+                        } label: {
+                            HStack(spacing: 6) {
+                                Image(systemName: "arrow.clockwise")
+                                Text("Regenerate Video")
+                            }
+                            .font(.subheadline)
+                            .foregroundColor(.white.opacity(0.9))
+                        }
+                        Spacer()
+                    }
+                }
+
+                // ✅ Video Preview Inside the Same Box
+                if let videoURL = currentScene.videoURL {
+                    VideoPlayer(player: player)
+                        .frame(height: 220)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                        .shadow(radius: 6)
+                        .onReceive(Just(videoURL)) { url in
+                            player.replaceCurrentItem(with: AVPlayerItem(url: url))
+                            player.play()
+                        }
+                }
+            }
+            .padding()
+            .background(
+                ZStack {
+                    Color.black.opacity(0.25)
+                    LinearGradient(
+                        colors: [
+                            Color("BackgroundGradientDark").opacity(0.15),
+                            Color("BackgroundGradientPurple").opacity(0.1)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                }
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 18))
+            .overlay(
+                RoundedRectangle(cornerRadius: 18)
+                    .stroke(Color.white.opacity(0.15), lineWidth: 1)
+            )
+            .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
+
+            // ✅ Navigation + Continue
+            if currentScene.videoURL != nil {
+                VStack(spacing: 16) {
+                    HStack(spacing: 16) {
+                        if viewModel.currentSceneIndex > 0 {
+                            Button(action: { viewModel.currentSceneIndex -= 1 }) {
+                                Text("← Previous")
+                                    .padding(.vertical, 10)
+                                    .padding(.horizontal, 20)
+                                    .background(Color.white.opacity(0.1))
+                                    .clipShape(Capsule())
+                                    .foregroundColor(.white)
+                            }
+                        }
+
+                        Spacer()
+
+                        if viewModel.currentSceneIndex < viewModel.scenes.count - 1 {
+                            Button(action: {
+                                if currentScene.videoURL == nil {
+                                    withAnimation { showSelectionWarning = true }
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                        withAnimation { showSelectionWarning = false }
+                                    }
+                                } else {
+                                    viewModel.currentSceneIndex += 1
+                                }
+                            }) {
+                                Text("Next →")
+                                    .padding(.vertical, 10)
+                                    .padding(.horizontal, 20)
+                                    .background(Color.white.opacity(0.1))
+                                    .clipShape(Capsule())
+                                    .foregroundColor(.white)
+                            }
+                        }
+                    }
+
+                    if viewModel.currentSceneIndex == viewModel.scenes.count - 1 {
+                        PrimaryGradientButton(title: "Continue to Final", isLoading: false) {
+                            var updated = VideoProject(
+                                id: project.id,
+                                title: project.title,
+                                script: project.script,
+                                thumbnail: viewModel.scenes.first?.previewImage ?? "defaultThumbnail",
+                                scenes: viewModel.scenes,
+                                sceneDescriptions: project.sceneDescriptions,
+                                imagePrompts: project.imagePrompts,
+                                klingPrompts: project.klingPrompts,
+                                isCompleted: true,
+                                progressStep: 4
+                            )
+                            updated.currentSceneIndex = viewModel.currentSceneIndex
+
+                            projectViewModel.upsertAndNavigate(updated) {
+                                router.goToVideoComplete(project: $0)
+                            }
+                        }
+                        .padding(.top, 10)
+                    }
+                }
+                .padding(.horizontal, 16)
+            }
+        }
+    }
+
 }

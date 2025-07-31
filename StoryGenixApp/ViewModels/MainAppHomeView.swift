@@ -35,7 +35,7 @@ struct MainAppHomeView: View {
             VStack(spacing: 4) {
                 // Title
                 HStack {
-                    Text("StoryGenIX")
+                    Text("My AI Director")
                         .font(.system(size: 40, weight: .bold))
                         .foregroundStyle(.white)
                     Image(systemName: "star.fill")

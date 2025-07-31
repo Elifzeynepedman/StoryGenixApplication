@@ -11,79 +11,55 @@ struct CompletedProjectCard: View {
     let project: VideoProject
     let onDelete: () -> Void
 
-    @State private var isViewPressed = false
-    @State private var isDeletePressed = false
     @State private var showPreview = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(spacing: 10) {
+            // Thumbnail
             Image(project.thumbnail)
                 .resizable()
-                .aspectRatio(1, contentMode: .fill)
-                .frame(height: 150)
-                .cornerRadius(14)
+                .scaledToFill()
+                .frame(height: 120)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .shadow(radius: 4)
 
+            // Title
             Text(project.title)
-                .font(.subheadline)
+                .font(.subheadline.bold())
                 .foregroundColor(.white)
                 .lineLimit(1)
 
-            HStack {
-                Button(action: {
-                    isViewPressed = true
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-                        isViewPressed = false
-                        showPreview = true
-                    }
-                }) {
+            // Actions
+            HStack(spacing: 12) {
+                Button(action: { showPreview = true }) {
                     Text("View")
-                        .font(.subheadline)
+                        .font(.caption.bold())
                         .foregroundColor(.white)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(isViewPressed ? Color.white.opacity(0.2) : Color.clear)
-                        )
+                        .padding(.horizontal, 35)
+                        .padding(.vertical, 8)
+                        .background(Color.white.opacity(0.08))
+                        .clipShape(Capsule())
                         .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.white, lineWidth: 1)
+                            Capsule().stroke(Color.white.opacity(0.25), lineWidth: 1)
                         )
-                        .animation(.easeInOut(duration: 0.2), value: isViewPressed)
                 }
 
-                Spacer()
-
-                Button(action: {
-                    isDeletePressed = true
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-                        isDeletePressed = false
-                        onDelete()
-                    }
-                }) {
-                    Text("Delete")
-                        .font(.subheadline)
+                Button(action: onDelete) {
+                    Image(systemName: "trash")
                         .foregroundColor(.white)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(isDeletePressed ? Color.white.opacity(0.2) : Color.clear)
-                        )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.white, lineWidth: 1)
-                        )
-                        .animation(.easeInOut(duration: 0.2), value: isDeletePressed)
+                        .padding(8)
                 }
             }
         }
         .padding()
-        .background(Color.white.opacity(0.05))
-        .cornerRadius(14)
+        .frame(maxWidth: .infinity)
+        .background(Color.white.opacity(0.06))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.1), lineWidth: 1))
         .sheet(isPresented: $showPreview) {
             ProjectPreviewModal(project: project, isPresented: $showPreview)
         }
     }
 }
+
 

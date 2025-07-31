@@ -1,4 +1,5 @@
 
+
 import SwiftUI
 
 struct FeedbackModalView: View {
@@ -12,51 +13,105 @@ struct FeedbackModalView: View {
 
     var body: some View {
         ZStack {
-            Color("DarkTextColor").opacity(0.8).ignoresSafeArea()
+            // ✅ Same Background as Main Screen
+            Image("BackgroundImage")
+                .resizable()
+                .scaledToFill()
+                .ignoresSafeArea()
+                .overlay(Color.black.opacity(0.35)) // subtle dim effect
 
-            VStack(spacing: 16) {
-                Text("\(emoji)\n\(title)")
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .multilineTextAlignment(.center)
+            VStack(spacing: 20) {
+                // ✅ Title
+                Text("\(emoji)  \(title)")
+                    .font(.system(size: 28, weight: .bold))
                     .foregroundColor(.white)
+                    .shadow(radius: 6)
 
-                TextField(placeholder, text: $message)
-                    .padding()
-                    .background(Color.white.opacity(0.1))
-                    .cornerRadius(10)
-                    .foregroundColor(.white)
-
-                HStack(spacing: 16) {
-                    Button("Cancel") {
-                        isPresented = false
+                // ✅ Input Box Styled Like ContentView
+                ZStack(alignment: .topLeading) {
+                    if message.isEmpty {
+                        Text(placeholder)
+                            .foregroundColor(.white.opacity(0.6))
+                            .padding(.horizontal, 14)
+                            .padding(.top, 14)
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.white.opacity(0.1))
-                    .cornerRadius(10)
-                    .foregroundColor(.white)
 
-                    Button("Submit") {
-                        let trimmed = message.trimmingCharacters(in: .whitespaces)
-                        if !trimmed.isEmpty {
-                            onSubmit(trimmed)
-                            isPresented = false
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.blue)
-                    .cornerRadius(10)
-                    .foregroundColor(.white)
+                    TextEditor(text: $message)
+                        .scrollContentBackground(.hidden)
+                        .frame(height: 120)
+                        .foregroundColor(.white)
+                        .padding(12)
+                        .background(
+                            ZStack {
+                                Color.black.opacity(0.3)
+                                LinearGradient(
+                                    colors: [
+                                        Color("BackgroundGradientDark").opacity(0.2),
+                                        Color("BackgroundGradientPurple").opacity(0.15)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            }
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: 18))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 18)
+                                .stroke(Color.white.opacity(0.15), lineWidth: 1)
+                        )
                 }
+                .padding(.horizontal, 24)
+
+                // ✅ Buttons
+                VStack(spacing: 14) {
+                    // Submit with Primary Gradient
+                    Button(action: submitAction) {
+                        Text("Submit")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(
+                                LinearGradient(
+                                    colors: [
+                                        Color("ButtonGradient1"),
+                                        Color("ButtonGradient2"),
+                                        Color("ButtonGradient3")
+                                    ],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 18))
+                            .shadow(color: .black.opacity(0.3), radius: 6, x: 0, y: 4)
+                    }
+
+                    // Cancel Button with Glass Look
+                    Button(action: { isPresented = false }) {
+                        Text("Cancel")
+                            .font(.headline)
+                            .foregroundColor(.white.opacity(0.85))
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.white.opacity(0.08))
+                            .clipShape(RoundedRectangle(cornerRadius: 18))
+                    }
+                }
+                .padding(.horizontal, 24)
+
+                Spacer()
             }
-            .padding(24)
-            .background(
-                RoundedRectangle(cornerRadius: 20)
-                    .fill(Color.white.opacity(0.05))
-            )
-            .padding()
+            .padding(.top, 60)
+        }
+        .transition(.move(edge: .bottom))
+        .animation(.spring(), value: isPresented)
+    }
+
+    private func submitAction() {
+        let trimmed = message.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !trimmed.isEmpty {
+            onSubmit(trimmed)
+            isPresented = false
         }
     }
 }

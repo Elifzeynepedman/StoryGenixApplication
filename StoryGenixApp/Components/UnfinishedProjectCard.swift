@@ -15,20 +15,23 @@ struct UnfinishedProjectCard: View {
     @Environment(Router.self) private var router
 
     var body: some View {
-        HStack {
+        HStack(spacing: 14) {
+            // Thumbnail
             Image(project.thumbnail)
                 .resizable()
-                .aspectRatio(1, contentMode: .fill)
+                .scaledToFill()
                 .frame(width: 90, height: 90)
-                .cornerRadius(12)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .shadow(radius: 4)
 
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: 8) {
                 Text(project.title)
-                    .font(.headline)
+                    .font(.subheadline.bold())
                     .foregroundColor(.white)
+                    .lineLimit(1)
 
                 ProgressView(value: Double(project.progressStep), total: 4)
-                    .accentColor(.white)
+                    .accentColor(Color("ButtonGradient2"))
 
                 Text(statusLabel(for: project.progressStep))
                     .font(.caption)
@@ -40,28 +43,26 @@ struct UnfinishedProjectCard: View {
             Button(action: {
                 if let latest = viewModel.project(for: project.id) {
                     viewModel.resumeProject(latest, using: router)
-                } else {
-                    print("⚠️ Could not find latest version of project \(project.id)")
                 }
             }) {
                 Image(systemName: "play.fill")
                     .foregroundColor(.white)
-                    .padding(8)
-                    .background(Color.blue)
-                    .clipShape(Circle())
+                    .font(.system(size: 16, weight: .bold))
+                    .padding(14)
+                    .shadow(color: Color("ButtonGradient2").opacity(0.5), radius: 6)
             }
 
-            Button(action: {
-                onDelete()
-            }) {
+            Button(action: onDelete) {
                 Image(systemName: "trash")
-                    .foregroundColor(.red)
+                    .foregroundColor(.white)
                     .padding(8)
             }
         }
         .padding()
-        .background(Color.white.opacity(0.05))
-        .cornerRadius(14)
+        .frame(maxWidth: .infinity)
+        .background(Color.white.opacity(0.06))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.1), lineWidth: 1))
     }
 
     private func statusLabel(for step: Int) -> String {

@@ -5,7 +5,6 @@
 //  Created by Elif Edman on 2.07.2025.
 //
 
-
 import SwiftUI
 
 struct SettingsScreen: View {
@@ -16,120 +15,154 @@ struct SettingsScreen: View {
 
     var body: some View {
         ZStack {
+            // Background
             Image("BackgroundImage")
                 .resizable()
                 .scaledToFill()
                 .ignoresSafeArea()
 
-            VStack(spacing: 24) {
-                Text("StoryGenix")
-                    .font(.system(size: 24, weight: .bold))
-                    .foregroundColor(.white)
-
-                Text("Settings")
-                    .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(.white)
-
-                // Subscription
-                settingsButton(title: "Subscription", trailing: {
-                    AnyView(
-                        Text("Pro")
-                            .font(.caption)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .background(LinearGradient(colors: [.blue, .pink], startPoint: .topLeading, endPoint: .bottomTrailing))
-                            .clipShape(Capsule())
+            ScrollView {
+                VStack(spacing: 28) {
+                    // Header
+                    VStack(spacing: 4) {
+                        Text("Settings")
+                            .font(.system(size: 34, weight: .bold))
                             .foregroundColor(.white)
-                    )
-                })
+                        Text("Manage your account and preferences")
+                            .font(.footnote)
+                            .foregroundColor(.white.opacity(0.7))
+                    }
+                    .padding(.top, 50)
 
-                // App Settings
-                settingsButton(title: "App Settings") {
-                    router.goToAppSettings()
+                    // Account
+                    settingsSection(title: "ACCOUNT") {
+                        settingsRowWithTrailing(icon: "crown.fill", title: "Subscription") {
+                            Text("Pro")
+                                .font(.caption)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 4)
+                                .background(
+                                    LinearGradient(colors: [.blue, .pink],
+                                                   startPoint: .topLeading,
+                                                   endPoint: .bottomTrailing)
+                                )
+                                .clipShape(Capsule())
+                                .foregroundColor(.white)
+                        }
+                    }
+
+                    // App
+                    settingsSection(title: "APP") {
+                        settingsRow(icon: "gear", title: "App Settings") {
+                            router.goToAppSettings()
+                        }
+                        settingsRow(icon: "envelope.fill", title: "Contact Us") {
+                            router.goToContact()
+                        }
+                    }
+
+                    // Feedback
+                    settingsSection(title: "FEEDBACK") {
+                        settingsRow(icon: "lightbulb.fill", title: "Improvements") {
+                            showFeedbackModal = true
+                        }
+                        settingsRow(icon: "ant.fill", title: "Report a Bug") {
+                            showBugModal = true
+                        }
+                    }
+
+                    // Info
+                    settingsSection(title: "INFO") {
+                        settingsRowWithTrailing(icon: "person.text.rectangle", title: "User ID") {
+                            Text(userId)
+                                .font(.caption)
+                                .foregroundColor(.white.opacity(0.8))
+                        }
+                    }
+
+                    Spacer(minLength: 40)
                 }
-
-                // Contact Us
-                settingsButton(title: "Contact Us") {
-                    router.goToContact()
-                }
-
-                // User ID
-                settingsButton(title: "User ID", trailing: {
-                    AnyView(Text(userId).foregroundColor(.gray))
-                }, isDisabled: true)
-
-                // Feedback
-                settingsButton(title: "Improvements") {
-                    showFeedbackModal = true
-                }
-
-                // Bug Report
-                settingsButton(title: "Report a Bug") {
-                    showBugModal = true
-                }
-
-                Spacer()
+                .padding(.horizontal)
             }
-            .padding()
         }
         .navigationBarBackButtonHidden(true)
         .sheet(isPresented: $showBugModal) {
-            FeedbackModalView(
-                title: "Report a Bug",
-                placeholder: "Brief description of the bug",
-                emoji: "🐞",
-                onSubmit: { message in submitBugReport(message) },
-                isPresented: $showBugModal
-            )
+                FeedbackModalView(title: "Report a Bug", placeholder: "Brief description of the bug", emoji: "🐞", onSubmit: submitBugReport, isPresented: $showBugModal)
+            }
+            .sheet(isPresented: $showFeedbackModal) {
+                FeedbackModalView(title: "Improvements", placeholder: "How can we improve?", emoji: "💡", onSubmit: submitFeedback, isPresented: $showFeedbackModal)
+            }
         }
-        .sheet(isPresented: $showFeedbackModal) {
-            FeedbackModalView(
-                title: "Improvements",
-                placeholder: "How can we improve?",
-                emoji: "💡",
-                onSubmit: { message in submitFeedback(message) },
-                isPresented: $showFeedbackModal
-            )
+
+    // MARK: - Helpers
+
+    private func settingsSection(title: String, @ViewBuilder content: () -> some View) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(title)
+                .font(.caption)
+                .foregroundColor(.white.opacity(0.06))
+                .padding(.horizontal)
+            content()
         }
     }
 
-    func submitBugReport(_ message: String) {
-        print("📮 Bug submitted: \(message)")
-    }
-
-    func submitFeedback(_ message: String) {
-        print("📮 Feedback submitted: \(message)")
-    }
-
-    @ViewBuilder
-    private func settingsButton(
+    // ✅ Row for action only
+    private func settingsRow(
+        icon: String,
         title: String,
-        action: (() -> Void)? = nil,
-        trailing: (() -> AnyView)? = nil,
-        isDisabled: Bool = false
+        showArrow: Bool = true,
+        action: @escaping () -> Void
     ) -> some View {
-        Button(action: { action?() }) {
-            HStack {
+        Button(action: action) {
+            HStack(spacing: 12) {
+                Image(systemName: icon)
+                    .font(.system(size: 18))
+                    .foregroundColor(.white)
+                    .frame(width: 30)
+
                 Text(title)
                     .foregroundColor(.white)
-                    .fontWeight(.medium)
+                    .font(.system(size: 16, weight: .medium))
+
                 Spacer()
-                if let trailing = trailing {
-                    trailing()
-                } else if !isDisabled {
+
+                if showArrow {
                     Image(systemName: "chevron.right")
-                        .foregroundColor(.white.opacity(0.5))
+                        .foregroundColor(.white.opacity(0.4))
                 }
             }
             .padding()
-            .background(Color.white.opacity(0.1))
-            .cornerRadius(12)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.white.opacity(0.1), lineWidth: 1)
-            )
+            .background(.ultraThinMaterial)
+            .clipShape(RoundedRectangle(cornerRadius: 14))
         }
-        .disabled(isDisabled)
+    }
+
+    // ✅ Row for trailing view (no tap action)
+    private func settingsRowWithTrailing(icon: String, title: String, @ViewBuilder trailing: () -> some View) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 18))
+                .foregroundColor(.white)
+                .frame(width: 30)
+
+            Text(title)
+                .foregroundColor(.white)
+                .font(.system(size: 16, weight: .medium))
+
+            Spacer()
+            trailing()
+        }
+        .padding()
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+    }
+
+    private func submitBugReport(_ message: String) {
+        print("📮 Bug submitted: \(message)")
+    }
+
+    private func submitFeedback(_ message: String) {
+        print("📮 Feedback submitted: \(message)")
     }
 }
 
@@ -137,3 +170,4 @@ struct SettingsScreen: View {
     SettingsScreen()
         .environment(Router())
 }
+

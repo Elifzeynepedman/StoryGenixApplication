@@ -20,64 +20,74 @@ struct VideoCompleteScreen: View {
     @State private var showDownloadSuccess = false
 
     var body: some View {
-        ZStack(alignment: .top) {
+        ZStack {
+            // ✅ Background
             Image("BackgroundImage")
                 .resizable()
                 .scaledToFill()
                 .ignoresSafeArea()
 
-            VStack(spacing: 24) {
-                Text("StoryGenix")
-                    .font(.system(size: 24, weight: .bold))
-                    .foregroundColor(.white)
-                    .padding(.top, 16)
-
-                Text("Your Video Is Ready")
-                    .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(.white)
-
-                Text("The video has been generated successfully")
-                    .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.8))
-
-                if let url = videoURL {
-                    VideoPlayer(player: player)
-                        .onAppear {
-                            player.replaceCurrentItem(with: AVPlayerItem(url: url))
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                player.play()
-                            }
-                        }
-                        .frame(width: 320, height: 320)
-                        .cornerRadius(18)
-                        .shadow(radius: 8)
-                } else {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 18)
-                            .fill(Color.black.opacity(0.2))
-                            .frame(width: 320, height: 320)
-                        Text("Video not found")
-                            .foregroundColor(.white.opacity(0.7))
-                    }
+            VStack(spacing: 20) {
+                // ✅ Header
+                VStack(spacing: 6) {
+                    Text("My AI Director")
+                        .font(.system(size: 36, weight: .bold))
+                        .foregroundColor(.white)
+                    Text("Your Video is Ready")
+                        .font(.title2.bold())
+                        .foregroundColor(.white.opacity(0.9))
                 }
+                .padding(.top, 40)
 
+                // ✅ Glass Video Card
                 VStack(spacing: 16) {
-                    Button(action: {
-                        if let url = videoURL {
-                            MediaSaver.saveVideoToPhotoLibrary(from: url) { success in
-                                if success {
-                                    withAnimation {
-                                        showDownloadSuccess = true
-                                    }
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                        withAnimation {
-                                            showDownloadSuccess = false
-                                        }
-                                    }
+                    if let url = videoURL {
+                        VideoPlayer(player: player)
+                            .frame(height: 240)
+                            .clipShape(RoundedRectangle(cornerRadius: 18))
+                            .shadow(radius: 8)
+                            .onAppear {
+                                player.replaceCurrentItem(with: AVPlayerItem(url: url))
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                    player.play()
                                 }
                             }
+                    } else {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 18)
+                                .fill(Color.black.opacity(0.2))
+                                .frame(height: 240)
+                            Text("Video not found")
+                                .foregroundColor(.white.opacity(0.7))
                         }
-                    }) {
+                    }
+                }
+                .padding()
+                .background(
+                    ZStack {
+                        Color.black.opacity(0.25)
+                        LinearGradient(
+                            colors: [
+                                Color("BackgroundGradientDark").opacity(0.15),
+                                Color("BackgroundGradientPurple").opacity(0.1)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    }
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 18))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 18)
+                        .stroke(Color.white.opacity(0.15), lineWidth: 1)
+                )
+                .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
+                .padding(.horizontal)
+
+                // ✅ Buttons Section
+                VStack(spacing: 16) {
+                    // Download Button
+                    Button(action: downloadVideo) {
                         Text("Download Video")
                             .font(.headline)
                             .foregroundColor(.white)
@@ -91,17 +101,18 @@ struct VideoCompleteScreen: View {
                             )
                     }
 
+                    // Share Button
                     PrimaryGradientButton(title: "Share Video", isLoading: false) {
                         isSharing = true
                     }
 
+                    // Return to Home
                     Button(action: {
                         var updated = project
                         updated.isCompleted = true
                         updated.progressStep = 4
 
-                        viewModel.replaceWithCompleted(updated) // ✅ cleans up old unfinished version
-
+                        viewModel.replaceWithCompleted(updated)
                         router.goToHome()
                     }) {
                         Text("Return to Home")
@@ -113,24 +124,47 @@ struct VideoCompleteScreen: View {
 
                 Spacer()
             }
-            .padding(.top, 30)
 
+            // ✅ Floating iOS-style success toast
             if showDownloadSuccess {
-                Text("✅ Video successfully downloaded")
-                    .font(.callout.bold())
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 10)
-                    .background(Color("DarkTextColor").opacity(0.85))
-                    .clipShape(Capsule())
-                    .padding(.top, 20)
-                    .transition(.move(edge: .top).combined(with: .opacity))
+                VStack {
+                    Spacer()
+                    Text("✅ Video saved to Photos")
+                        .font(.callout.bold())
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
+                        .background(.ultraThinMaterial)
+                        .cornerRadius(12)
+                        .shadow(radius: 4)
+                        .padding(.bottom, 40)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+                .animation(.easeInOut, value: showDownloadSuccess)
             }
         }
         .navigationBarBackButtonHidden(true)
         .sheet(isPresented: $isSharing) {
             if let url = videoURL {
                 ShareSheetView(items: [url])
+            }
+        }
+    }
+
+    // ✅ Download Logic
+    private func downloadVideo() {
+        if let url = videoURL {
+            MediaSaver.saveVideoToPhotoLibrary(from: url) { success in
+                if success {
+                    withAnimation {
+                        showDownloadSuccess = true
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                        withAnimation {
+                            showDownloadSuccess = false
+                        }
+                    }
+                }
             }
         }
     }
@@ -148,3 +182,5 @@ struct VideoCompleteScreen: View {
     .environment(Router())
     .environmentObject(ProjectsViewModel())
 }
+
+

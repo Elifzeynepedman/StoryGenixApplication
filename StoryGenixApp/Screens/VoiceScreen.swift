@@ -18,6 +18,7 @@ struct VoiceScreen: View {
 
     var body: some View {
         ZStack {
+            // ✅ Background
             Image("BackgroundImage")
                 .resizable()
                 .scaledToFill()
@@ -31,7 +32,6 @@ struct VoiceScreen: View {
 
                 // ✅ Generate Voice Button (Gradient CTA)
                 if audioURL == nil {
-                    // ✅ Show gradient button for first time
                     PrimaryGradientButton(
                         title: "Generate Voice",
                         isLoading: isGenerating,
@@ -40,7 +40,6 @@ struct VoiceScreen: View {
                     .frame(maxWidth: 340)
                     .disabled(isGenerating)
                 } else {
-                    // ✅ Replace with text-only button
                     Button {
                         Task { generateVoice() }
                     } label: {
@@ -57,7 +56,6 @@ struct VoiceScreen: View {
                     }
                 }
 
-
                 // ✅ Audio Player Section
                 if audioURL != nil {
                     audioPlayerSection
@@ -71,12 +69,16 @@ struct VoiceScreen: View {
         .onChange(of: selectedGender) {
             selectedVoice = selectedGender == "Female" ? "Jennie" : "Brian"
         }
+        .onAppear {
+            // ✅ Debug Print
+            print("DEBUG Script:", project.script)
+        }
     }
 
     // ✅ Header Section
     var headerSection: some View {
         VStack(spacing: 8) {
-            Text("StoryGenix")
+            Text("My AI Director")
                 .font(.system(size: 32, weight: .bold))
                 .foregroundStyle(.white)
             Text("Choose Your Voice")
@@ -140,7 +142,7 @@ struct VoiceScreen: View {
                 .fill(Color.black.opacity(0.3))
                 .overlay(
                     ScrollView {
-                        Text(project.script)
+                        Text(project.script) // ✅ Full script displayed
                             .padding(16)
                             .font(.system(size: 14))
                             .foregroundColor(.white)
@@ -209,7 +211,13 @@ struct VoiceScreen: View {
 }
 
 #Preview {
-    VoiceScreen(project: VideoProject(title: "Demo Project", script: "Sample script", thumbnail: "defaultThumbnail", isCompleted: false, progressStep: 1))
-        .environment(Router())
-        .environmentObject(ProjectsViewModel())
+    VoiceScreen(project: VideoProject(
+        title: "Demo Project",
+        script: "Scene 1: A robot picks up a paintbrush.\nScene 2: The robot paints a sunset.",
+        thumbnail: "defaultThumbnail",
+        isCompleted: false,
+        progressStep: 1
+    ))
+    .environment(Router())
+    .environmentObject(ProjectsViewModel())
 }

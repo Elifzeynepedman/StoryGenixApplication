@@ -7,13 +7,14 @@
 
 import SwiftUI
 
-
 @MainActor
 class ScriptLogicViewModel: ObservableObject {
     @Published var script: String = ""
-    @Published var scenes: [SceneResponse] = [] // full scene objects
+    @Published var scenes: [SceneResponse] = [] // Full scene objects
     @Published var isLoading = false
-
+    @Published var errorMessage: String? = nil
+    
+    /// Cleans the script text for display
     var displayScript: String {
         var text = script
         text = text.replacingOccurrences(of: "### Script", with: "", options: .caseInsensitive)
@@ -21,9 +22,6 @@ class ScriptLogicViewModel: ObservableObject {
         text = text.replacingOccurrences(of: "**Script:**", with: "", options: .caseInsensitive)
         text = text.replacingOccurrences(of: "Script:", with: "", options: .caseInsensitive)
 
-        if let range = text.range(of: "Scenes:", options: .caseInsensitive) {
-            text = String(text[..<range.lowerBound])
-        }
 
         if let klingRange = text.range(of: "🎥", options: .caseInsensitive) {
             text = String(text[..<klingRange.lowerBound])
@@ -34,16 +32,19 @@ class ScriptLogicViewModel: ObservableObject {
     }
 
     func generateScript(for topic: String) async {
-        isLoading = true
-        do {
-            let response = try await ApiService.shared.generateScript(topic: topic, projectId: "mock123")
-            self.script = response.script
-            self.scenes = response.scenes // ✅ Store full objects
-        } catch {
-            print("❌ Error generating script: \(error)")
-            self.script = "Error generating script."
-            self.scenes = []
+            isLoading = true
+            errorMessage = nil
+            script = ""
+
+            do {
+                let response = try await ApiService.shared.generateScript(topic: topic, projectId: UUID().uuidString)
+                self.script = response.script
+                self.scenes = response.scenes
+            } catch {
+                print("❌ Error generating script: \(error.localizedDescription)")
+                self.errorMessage = "Failed to generate script. Please try again."
+            }
+
+            isLoading = false
         }
-        isLoading = false
     }
-}
