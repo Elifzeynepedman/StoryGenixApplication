@@ -31,10 +31,13 @@ class VoiceViewModel: ObservableObject {
             errorMessage = "Missing Project ID"
             return
         }
+
         isGenerating = true
+        errorMessage = nil
         defer { isGenerating = false }
 
         do {
+            // ✅ Call backend API
             let response = try await ApiService.shared.generateVoice(
                 projectId: projectId,
                 voiceId: selectedVoice,
@@ -42,26 +45,23 @@ class VoiceViewModel: ObservableObject {
                 sceneIndex: 0
             )
 
-            if let url = URL(string: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3") {
+            // ✅ Use actual backend audio URL
+            if let url = URL(string: response.audio_url) {
                 audioURL = url
-                print("✅ Using remote URL for playback: \(url)")
+                print("✅ Voice generated: \(url)")
                 return
+            } else {
+                errorMessage = "Invalid audio URL from server."
             }
-
-            
-
-
         } catch {
-            print("⚠️ API failed: \(error.localizedDescription)")
+            print("⚠️ API Error: \(error.localizedDescription)")
+            errorMessage = "Failed to generate voice. Please try again."
         }
 
-        // ✅ Fallback: Bundled mock audio
+        // ✅ Optional: Remove fallback for production OR keep as backup
         if let path = Bundle.main.path(forResource: "sample", ofType: "mp3") {
             audioURL = URL(fileURLWithPath: path)
-            print("✅ Using bundled mock audio.")
-        } else {
-            errorMessage = "Failed to load audio."
+            print("✅ Using bundled mock audio as fallback.")
         }
     }
 }
-

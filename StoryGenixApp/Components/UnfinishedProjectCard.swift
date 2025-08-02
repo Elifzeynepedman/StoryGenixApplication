@@ -30,8 +30,9 @@ struct UnfinishedProjectCard: View {
                     .foregroundColor(.white)
                     .lineLimit(1)
 
-                ProgressView(value: Double(project.progressStep), total: 4)
+                ProgressView(value: Double(project.progressStep.rawValue), total: 4)
                     .accentColor(Color("ButtonGradient2"))
+
 
                 Text(statusLabel(for: project.progressStep))
                     .font(.caption)
@@ -65,12 +66,14 @@ struct UnfinishedProjectCard: View {
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.1), lineWidth: 1))
     }
 
-    private func statusLabel(for step: Int) -> String {
+    private func statusLabel(for step: ProgressStep) -> String {
         switch step {
-        case 1: return "Continue from Voice"
-        case 2: return "Continue from Images"
-        case 3: return "Continue from Video"
-        default: return "Continue Project"
+        case .script: return "Continue from Script"
+        case .voice: return "Continue from Voice"
+        case .image: return "Continue from Images"
+        case .video: return "Continue from Video"
+        case .completed: return "Completed"
         }
     }
+
 }

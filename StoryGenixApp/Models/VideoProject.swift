@@ -1,8 +1,16 @@
 import Foundation
 
+enum ProgressStep: Int, Codable {
+    case script = 1
+    case voice = 2
+    case image = 3
+    case video = 4
+    case completed = 5
+}
+
 struct VideoProject: Identifiable, Codable, Hashable {
     let id: UUID
-    var backendId: String? // ✅ Add this property
+    var backendId: String?
     var title: String
     var script: String
     var thumbnail: String
@@ -10,14 +18,17 @@ struct VideoProject: Identifiable, Codable, Hashable {
     var sceneDescriptions: [String]
     var imagePrompts: [String]
     var klingPrompts: [String]
+    var voiceId: String?
+    var audioURL: String?
+    var selectedImageIndices: [Int: Int]
+    var videoURL: String?
     var isCompleted: Bool
-    var progressStep: Int
-    var currentSceneIndex: Int? = nil
-    var selectedImageIndices: [Int: Int] = [:]
+    var progressStep: ProgressStep
+    var currentSceneIndex: Int?
 
     init(
         id: UUID = UUID(),
-        backendId: String? = nil, // ✅ Added parameter
+        backendId: String? = nil,
         title: String,
         script: String = "",
         thumbnail: String,
@@ -25,12 +36,16 @@ struct VideoProject: Identifiable, Codable, Hashable {
         sceneDescriptions: [String] = [],
         imagePrompts: [String] = [],
         klingPrompts: [String] = [],
-        isCompleted: Bool,
-        progressStep: Int,
+        voiceId: String? = nil,
+        audioURL: String? = nil,
+        selectedImageIndices: [Int: Int] = [:],
+        videoURL: String? = nil,
+        isCompleted: Bool = false,
+        progressStep: ProgressStep = .script,
         currentSceneIndex: Int? = nil
     ) {
         self.id = id
-        self.backendId = backendId // ✅ Assign here
+        self.backendId = backendId
         self.title = title
         self.script = script
         self.thumbnail = thumbnail
@@ -38,6 +53,10 @@ struct VideoProject: Identifiable, Codable, Hashable {
         self.sceneDescriptions = sceneDescriptions
         self.imagePrompts = imagePrompts
         self.klingPrompts = klingPrompts
+        self.voiceId = voiceId
+        self.audioURL = audioURL
+        self.selectedImageIndices = selectedImageIndices
+        self.videoURL = videoURL
         self.isCompleted = isCompleted
         self.progressStep = progressStep
         self.currentSceneIndex = currentSceneIndex

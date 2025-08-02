@@ -71,7 +71,7 @@ struct VoiceScreen: View {
                     PrimaryGradientButton(title: "Generate Voice", isLoading: viewModel.isGenerating) {
                         Task {
                             await viewModel.generateVoice(
-                                projectId: project.backendId ?? "mock-project-123",
+                                projectId: project.backendId ?? "",
                                 script: project.script
                             )
                         }
@@ -81,7 +81,7 @@ struct VoiceScreen: View {
                     Button {
                         Task {
                             await viewModel.generateVoice(
-                                projectId: project.backendId ?? "mock-project-123",
+                                projectId: project.backendId ?? "",
                                 script: project.script
                             )
                         }
@@ -94,25 +94,25 @@ struct VoiceScreen: View {
                         .foregroundColor(.white)
                         .padding(.vertical, 6)
                     }
-                    // ✅ Removed extra padding below Regenerate Voice
                 }
 
                 // ✅ Audio Player + Continue Button
                 if let audioURL = viewModel.audioURL {
-                    VStack(spacing: 12) { // ✅ Reduced spacing from 16 → 12
+                    VStack(spacing: 12) {
                         AudioPlayerView(audioURL: audioURL)
 
-                        // ✅ Primary Gradient Button
                         PrimaryGradientButton(title: "Continue to Images", isLoading: false) {
                             var updated = project
-                            updated.progressStep = 2
+                            updated.voiceId = viewModel.selectedVoice
+                            updated.audioURL = viewModel.audioURL?.absoluteString
+                            updated.progressStep = .image
                             projectViewModel.upsertAndNavigate(updated) {
                                 router.goToImages(project: $0)
                             }
                         }
                         .frame(maxWidth: 300)
                     }
-                    .padding(.top, 8) // ✅ Slightly tighter
+                    .padding(.top, 8)
                 }
 
                 Spacer()

@@ -8,16 +8,19 @@ import AVFoundation
 
 struct AudioPlayerView: View {
     let audioURL: URL
-    @State private var player: AVPlayer?
+    
+    @State private var player: AVPlayer? = nil
     @State private var isPlaying = false
     @State private var progress: Double = 0
     @State private var duration: Double = 0
+    @State private var currentTime: Double = 0
     @State private var timeObserver: Any?
 
     var body: some View {
         VStack(spacing: 10) {
+            // ✅ Progress Bar & Time Labels
             HStack {
-                Text(formatTime(progress * duration))
+                Text(formatTime(currentTime))
                     .foregroundColor(.white)
                     .font(.caption)
 
@@ -36,6 +39,7 @@ struct AudioPlayerView: View {
             }
             .padding(.horizontal)
 
+            // ✅ Play / Pause Button
             Button(action: togglePlay) {
                 Image(systemName: isPlaying ? "pause.circle.fill" : "play.circle.fill")
                     .resizable()
@@ -48,6 +52,7 @@ struct AudioPlayerView: View {
     }
 
     private func setupPlayer() {
+        configureAudioSession()
         print("🎧 Setting up AVPlayer for: \(audioURL)")
         player = AVPlayer(url: audioURL)
         guard let player = player else { return }
@@ -75,11 +80,22 @@ struct AudioPlayerView: View {
         }
     }
 
+    private func configureAudioSession() {
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+            try AVAudioSession.sharedInstance().setActive(true)
+        } catch {
+            print("⚠️ Failed to configure audio session: \(error)")
+        }
+    }
+
     private func cleanup() {
         if let observer = timeObserver {
             player?.removeTimeObserver(observer)
+            timeObserver = nil
         }
         player?.pause()
+        player = nil
     }
 
     private func togglePlay() {
@@ -103,3 +119,4 @@ struct AudioPlayerView: View {
         return String(format: "%d:%02d", minutes, seconds)
     }
 }
+

@@ -12,14 +12,14 @@ struct VideoScene: Identifiable, Codable, Hashable {
     var sceneText: String
     var prompt: String
     var videoURL: URL?
-    var previewImage: String
+    var previewImage: String?  // ✅ Optional for flexibility
 
     init(
         id: UUID = UUID(),
         sceneText: String,
-        prompt: String,
+        prompt: String = "",
         videoURL: URL? = nil,
-        previewImage: String
+        previewImage: String? = nil
     ) {
         self.id = id
         self.sceneText = sceneText

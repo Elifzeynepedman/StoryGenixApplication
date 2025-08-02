@@ -1,13 +1,6 @@
 import SwiftUI
 import Observation
 
-enum ProgressStep: Int {
-    case script = 1
-    case voice = 2
-    case image = 3
-    case video = 4
-}
-
 enum Route: Hashable {
     case home
     case script(topic: String)
@@ -57,18 +50,19 @@ class Router {
     
     func goToStep(for project: VideoProject) {
         switch project.progressStep {
-        case 1:
-            goToVoice(project: project)
-        case 2:
-            goToImages(project: project)
-        case 3:
-            goToVideoPreview(project: project)
-        case 4:
-            goToVideoComplete(project: project)
-        default:
+        case .script:
             goToScript(topic: project.title)
+        case .voice:
+            goToVoice(project: project)
+        case .image:
+            goToImages(project: project)
+        case .video:
+            goToVideoPreview(project: project)
+        case .completed:
+            goToVideoComplete(project: project)
         }
     }
+
 
 
 }

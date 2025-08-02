@@ -32,19 +32,25 @@ class ScriptLogicViewModel: ObservableObject {
     }
 
     func generateScript(for topic: String) async {
-            isLoading = true
-            errorMessage = nil
-            script = ""
+        isLoading = true
+        errorMessage = nil
+        script = ""
 
-            do {
-                let response = try await ApiService.shared.generateScript(topic: topic, projectId: UUID().uuidString)
-                self.script = response.script
-                self.scenes = response.scenes
-            } catch {
-                print("❌ Error generating script: \(error.localizedDescription)")
-                self.errorMessage = "Failed to generate script. Please try again."
-            }
-
-            isLoading = false
+        do {
+            // ✅ 1. Create a temporary backend project first
+            let projectResponse = try await ApiService.shared.createProject(title: topic, topic: topic)
+            
+            // ✅ 2. Generate script for this project
+            let response = try await ApiService.shared.generateScriptForProject(projectId: projectResponse._id, topic: topic)
+            
+            self.script = response.script
+            self.scenes = response.scenes
+        } catch {
+            print("❌ Error generating script: \(error.localizedDescription)")
+            self.errorMessage = "Failed to generate script. Please try again."
         }
+
+        isLoading = false
+    }
+
     }

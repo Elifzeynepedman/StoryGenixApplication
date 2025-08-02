@@ -198,7 +198,7 @@ struct ScriptScreen: View {
                 imagePrompts: scriptResponse.scenes.map { $0.imagePrompt },
                 klingPrompts: scriptResponse.scenes.map { $0.klingPrompt },
                 isCompleted: false,
-                progressStep: 1
+                progressStep: .voice // ✅ ENUM instead of Int
             )
             
             // ✅ 4. Save and navigate
@@ -210,6 +210,4 @@ struct ScriptScreen: View {
             print("Error creating project or generating script: \(error)")
         }
     }
-
-
 }

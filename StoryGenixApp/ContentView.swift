@@ -278,24 +278,18 @@ struct ContentView: View {
     @MainActor
     private func fetchSurpriseTopic() async {
         isLoadingSurprise = true
+        defer { isLoadingSurprise = false }
+        
         do {
-            let url = URL(string: "http://127.0.0.1:5001/api/script/create_random_topic")!
-            var request = URLRequest(url: url)
-            request.httpMethod = "POST"
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-            let (data, _) = try await URLSession.shared.data(for: request)
-            struct TopicResponse: Decodable { let topic: String }
-            let result = try JSONDecoder().decode(TopicResponse.self, from: data)
-
-            topic = result.topic
+            let newTopic = try await ApiService.shared.fetchRandomTopic()
+            topic = newTopic
             showEmptyError = false
         } catch {
-            print("❌ Error fetching surprise topic: \(error)")
+            print("❌ Error fetching surprise topic: \(error.localizedDescription)")
             topic = ideaFor(title: suggestedIdeas.randomElement() ?? "The Eye of a Storm")
         }
-        isLoadingSurprise = false
     }
+
 }
 
 #Preview {

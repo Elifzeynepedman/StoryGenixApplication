@@ -110,8 +110,7 @@ struct VideoCompleteScreen: View {
                     Button(action: {
                         var updated = project
                         updated.isCompleted = true
-                        updated.progressStep = 4
-
+                        updated.progressStep = .completed
                         viewModel.replaceWithCompleted(updated)
                         router.goToHome()
                     }) {
@@ -170,17 +169,5 @@ struct VideoCompleteScreen: View {
     }
 }
 
-#Preview {
-    VideoCompleteScreen(project: VideoProject(
-        title: "Sample Project",
-        script: "The eye sees the world.",
-        thumbnail: "sampleThumbnail",
-        scenes: [],
-        isCompleted: false,
-        progressStep: 3
-    ))
-    .environment(Router())
-    .environmentObject(ProjectsViewModel())
-}
 
 
