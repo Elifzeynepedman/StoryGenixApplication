@@ -17,11 +17,20 @@ struct ImageScreen: View {
                 .ignoresSafeArea()
             
             VStack(spacing: 20) {
-                Text("Generate Images")
-                    .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(.white)
-                    .padding(.top, 40)
-                
+
+                VStack(spacing: 6) {
+                    Text("My AI Director")
+                        .font(.system(size: 36, weight: .bold))
+                        .foregroundColor(.white)
+                    Text("Generate Images")
+                        .font(.title2.bold())
+                        .foregroundColor(.white.opacity(0.9))
+                    Text("Step 3 out of 4")
+                        .font(.system(size: 12, weight: .light))
+                        .foregroundColor(.white.opacity(0.9))
+                }
+                .padding(.top, 20)
+
                 // ✅ Aspect ratio toggle
                 SegmentedToggle(options: viewModel.aspectOptions, selected: $viewModel.selectedAspect)
                     .padding(.horizontal, 20)

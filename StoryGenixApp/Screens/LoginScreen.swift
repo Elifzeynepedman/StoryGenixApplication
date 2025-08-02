@@ -6,96 +6,150 @@
 //
 
 import SwiftUI
+import AuthenticationServices
+import GoogleSignIn
+import FirebaseAuth
+import Firebase
 
 struct LoginScreen: View {
-    @State private var email: String = ""
-    @State private var password: String = ""
-    @State private var isLoading: Bool = false
-    @State private var loginMessage: String = ""
-
+    @Binding var showLoginSheet: Bool
+    @State private var showEmailLogin = false
+    
     var body: some View {
         ZStack {
-            Image("BackgroundImage")
-                .resizable()
-                .scaledToFill()
-                .ignoresSafeArea()
-
+            Color.black.ignoresSafeArea()
+            
             VStack(spacing: 24) {
-                Text("Login to StoryGenIX")
-                    .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(.white)
-                    .padding(.bottom, 20)
-
-                TextField("Email", text: $email)
-                    .autocapitalization(.none)
-                    .keyboardType(.emailAddress)
-                    .padding()
-                    .background(Color.white.opacity(0.2))
-                    .cornerRadius(12)
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 20)
-
-                SecureField("Password", text: $password)
-                    .padding()
-                    .background(Color.white.opacity(0.2))
-                    .cornerRadius(12)
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 20)
-
-                Button {
-                    Task { await loginUser() }
-                } label: {
-                    if isLoading {
-                        ProgressView().progressViewStyle(CircularProgressViewStyle(tint: .white))
-                            .frame(height: 44)
-                            .frame(maxWidth: .infinity)
-                            .background(Color.white.opacity(0.2))
-                            .clipShape(RoundedRectangle(cornerRadius: 16))
-                    } else {
-                        Text("Login")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                            .frame(height: 44)
-                            .frame(maxWidth: .infinity)
-                            .background(
-                                LinearGradient(colors: [Color.purple, Color.pink],
-                                               startPoint: .leading,
-                                               endPoint: .trailing)
-                            )
-                            .clipShape(RoundedRectangle(cornerRadius: 16))
-                    }
-                }
-                .padding(.horizontal, 60)
-                .padding(.top, 10)
-
-                if !loginMessage.isEmpty {
-                    Text(loginMessage)
-                        .foregroundColor(.white)
-                        .padding(.top, 10)
-                }
-
                 Spacer()
+                
+                Text("Sign in to Continue")
+                    .foregroundColor(.white)
+                    .font(.system(size: 24, weight: .bold))
+                    .padding(.bottom, 8)
+                
+                // ✅ Apple Sign-In
+                SignInWithAppleButton(.signIn) { request in
+                    request.requestedScopes = [.fullName, .email]
+                } onCompletion: { result in
+                    handleAppleSignIn(result: result)
+                }
+                .signInWithAppleButtonStyle(SignInWithAppleButton.Style.white)
+                .frame(height: 50)
+                .cornerRadius(8)
+                .padding(.horizontal)
+                
+                // ✅ Google Sign-In
+                Button(action: {
+                    signInWithGoogle()
+                }) {
+                    HStack(spacing: 12) {
+                        Image(systemName: "g.circle.fill")
+                            .font(.title2)
+                        Text("Continue with Google")
+                            .font(.headline)
+                    }
+                    .foregroundColor(.black)
+                    .frame(maxWidth: .infinity, minHeight: 50)
+                    .background(Color.white)
+                    .cornerRadius(8)
+                }
+                .padding(.horizontal)
+                
+                // ✅ Email Login
+                Button(action: {
+                    showEmailLogin = true
+                }) {
+                    Text("Continue with Email")
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity, minHeight: 50)
+                        .background(Color.gray.opacity(0.3))
+                        .cornerRadius(8)
+                }
+                .padding(.horizontal)
+                
+                Spacer()
+                
+                Button(action: { showLoginSheet = false }) {
+                    Text("Cancel")
+                        .foregroundColor(.white.opacity(0.8))
+                        .underline()
+                }
+                .padding(.bottom, 40)
+            }
+        }
+        .sheet(isPresented: $showEmailLogin) {
+            EmailLoginScreen(showLoginSheet: $showLoginSheet)
+        }
+    }
+    
+    // MARK: - Google Sign-In
+    private func signInWithGoogle() {
+        guard let clientID = FirebaseApp.app()?.options.clientID else {
+            print("❌ Missing Firebase clientID")
+            return
+        }
+        
+        guard let rootVC = UIApplication.shared.connectedScenes
+            .compactMap({ ($0 as? UIWindowScene)?.windows.first?.rootViewController }).first else {
+            print("❌ Could not get root view controller")
+            return
+        }
+        
+        let config = GIDConfiguration(clientID: clientID)
+        GIDSignIn.sharedInstance.signIn(withPresenting: rootVC) { signInResult, error in
+            if let error = error {
+                print("❌ Google Sign-In failed: \(error.localizedDescription)")
+                return
+            }
+            
+            guard let user = signInResult?.user,
+                  let idToken = user.idToken?.tokenString else {
+                print("❌ Google user or token missing")
+                return
+            }
+            
+            let credential = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: user.accessToken.tokenString)
+            
+            Auth.auth().signIn(with: credential) { result, error in
+                if let error = error {
+                    print("❌ Firebase Google login failed: \(error.localizedDescription)")
+                } else if let user = result?.user {
+                    print("✅ Logged in with Google: \(user.uid)")
+                    APIManager.shared.syncUser(firebaseUid: user.uid, email: user.email, username: user.displayName)
+                    showLoginSheet = false
+                }
             }
         }
     }
-
-    private func loginUser() async {
-        guard !email.isEmpty, !password.isEmpty else {
-            loginMessage = "Please fill in all fields"
-            return
+    
+    // MARK: - Apple Sign-In
+    private func handleAppleSignIn(result: Result<ASAuthorization, Error>) {
+        switch result {
+        case .success(let authResults):
+            if let credential = authResults.credential as? ASAuthorizationAppleIDCredential,
+               let identityToken = credential.identityToken,
+               let tokenString = String(data: identityToken, encoding: .utf8) {
+                
+                let firebaseCredential = OAuthProvider.credential(withProviderID: "apple.com",
+                                                                  idToken: tokenString,
+                                                                  rawNonce: "random-nonce") // Replace with a real nonce
+                
+                Auth.auth().signIn(with: firebaseCredential) { result, error in
+                    if let error = error {
+                        print("❌ Firebase Apple sign-in error: \(error.localizedDescription)")
+                    } else if let user = result?.user {
+                        print("✅ Logged in with Apple: \(user.uid)")
+                        APIManager.shared.syncUser(firebaseUid: user.uid, email: user.email, username: user.displayName)
+                        showLoginSheet = false
+                    }
+                }
+            }
+        case .failure(let error):
+            print("❌ Apple sign-in error: \(error.localizedDescription)")
         }
-
-        isLoading = true
-        do {
-            let token = try await AuthService.shared.login(email: email, password: password)
-            loginMessage = "✅ Logged in! Token: \(token.prefix(10))..."
-        } catch {
-            loginMessage = "❌ Login failed: \(error.localizedDescription)"
-        }
-        isLoading = false
     }
 }
 
 #Preview {
-    LoginScreen()
+    LoginScreen(showLoginSheet: .constant(true))
 }

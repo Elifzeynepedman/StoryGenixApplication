@@ -1,223 +1,127 @@
 import SwiftUI
-import AVFoundation
 
 struct VoiceScreen: View {
     let project: VideoProject
-
-    @State private var selectedGender = "Female"
-    @State private var selectedVoice = "Jennie"
-    @State private var isGenerating = false
-    @State private var audioURL: URL? = nil
+    @StateObject private var viewModel = VoiceViewModel()
 
     @Environment(Router.self) private var router
     @EnvironmentObject private var projectViewModel: ProjectsViewModel
 
-    let femaleVoices = ["Jennie", "Elif", "Sarah", "Katie"]
-    let maleVoices = ["Brian", "David", "Alex", "Mike"]
-    let columns = [GridItem(.flexible(), spacing: 16), GridItem(.flexible(), spacing: 16)]
-
     var body: some View {
         ZStack {
-            // ✅ Background
             Image("BackgroundImage")
                 .resizable()
                 .scaledToFill()
                 .ignoresSafeArea()
 
-            VStack(spacing: 24) {
-                headerSection
+            VStack(spacing: 18) {
+                // ✅ Header
+                VStack(spacing: 8) {
+                    Text("My AI Director")
+                        .font(.system(size: 32, weight: .bold))
+                        .foregroundColor(.white)
+                    Text("Choose Your Voice")
+                        .foregroundColor(.white.opacity(0.9))
+                        .font(.title2.bold())
+                    Text("Step 2 of 4")
+                        .font(.system(size: 12))
+                        .foregroundColor(.white.opacity(0.7))
 
-                // ✅ Voice Selection Grid
-                voiceGridSection
+                    SegmentedToggle(options: ["Female", "Male"], selected: $viewModel.selectedGender)
+                        .padding(.top, 8)
+                }
 
-                // ✅ Generate Voice Button (Gradient CTA)
-                if audioURL == nil {
-                    PrimaryGradientButton(
-                        title: "Generate Voice",
-                        isLoading: isGenerating,
-                        action: generateVoice
-                    )
-                    .frame(maxWidth: 340)
-                    .disabled(isGenerating)
-                } else {
-                    Button {
-                        Task { generateVoice() }
-                    } label: {
-                        if isGenerating {
-                            ProgressView().progressViewStyle(CircularProgressViewStyle(tint: .white))
-                        } else {
-                            HStack(spacing: 6) {
-                                Image(systemName: "arrow.clockwise")
-                                Text("Regenerate Voice")
-                            }
-                            .font(.subheadline)
-                            .foregroundColor(.white.opacity(0.9))
+                // ✅ Voice Options Grid
+                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 14) {
+                    ForEach(viewModel.voicesForCurrentGender(), id: \.self) { voice in
+                        Button(action: { viewModel.selectedVoice = voice }) {
+                            Text(voice)
+                                .font(.subheadline)
+                                .foregroundColor(.white)
+                                .padding(10)
+                                .frame(maxWidth: .infinity)
+                                .background(viewModel.selectedVoice == voice ? Color.blue.opacity(0.3) : Color.black.opacity(0.2))
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
                         }
                     }
                 }
+                .padding(.top, 12)
 
-                // ✅ Audio Player Section
-                if audioURL != nil {
-                    audioPlayerSection
+                // ✅ Script Display
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Generated Script")
+                        .foregroundColor(.white.opacity(0.9))
+                        .font(.headline)
+
+                    ScrollView {
+                        Text(project.script)
+                            .foregroundColor(.white)
+                            .font(.body)
+                            .padding()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(Color.black.opacity(0.25))
+                            .cornerRadius(12)
+                    }
+                    .frame(height: 140)
+                }
+                .padding(.top, 12)
+
+                // ✅ Generate or Regenerate Button
+                if viewModel.audioURL == nil {
+                    PrimaryGradientButton(title: "Generate Voice", isLoading: viewModel.isGenerating) {
+                        Task {
+                            await viewModel.generateVoice(
+                                projectId: project.backendId ?? "mock-project-123",
+                                script: project.script
+                            )
+                        }
+                    }
+                    .frame(maxWidth: 300)
+                } else {
+                    Button {
+                        Task {
+                            await viewModel.generateVoice(
+                                projectId: project.backendId ?? "mock-project-123",
+                                script: project.script
+                            )
+                        }
+                    } label: {
+                        HStack(spacing: 6) {
+                            Image(systemName: "arrow.clockwise")
+                            Text("Regenerate Voice")
+                        }
+                        .font(.subheadline)
+                        .foregroundColor(.white)
+                        .padding(.vertical, 6)
+                    }
+                    // ✅ Removed extra padding below Regenerate Voice
+                }
+
+                // ✅ Audio Player + Continue Button
+                if let audioURL = viewModel.audioURL {
+                    VStack(spacing: 12) { // ✅ Reduced spacing from 16 → 12
+                        AudioPlayerView(audioURL: audioURL)
+
+                        // ✅ Primary Gradient Button
+                        PrimaryGradientButton(title: "Continue to Images", isLoading: false) {
+                            var updated = project
+                            updated.progressStep = 2
+                            projectViewModel.upsertAndNavigate(updated) {
+                                router.goToImages(project: $0)
+                            }
+                        }
+                        .frame(maxWidth: 300)
+                    }
+                    .padding(.top, 8) // ✅ Slightly tighter
                 }
 
                 Spacer()
             }
             .padding(.horizontal, 20)
-            .padding(.top, 30)
+            .padding(.top, 20)
         }
-        .onChange(of: selectedGender) {
-            selectedVoice = selectedGender == "Female" ? "Jennie" : "Brian"
-        }
-        .onAppear {
-            // ✅ Debug Print
-            print("DEBUG Script:", project.script)
+        .onChange(of: viewModel.selectedGender) {
+            viewModel.resetVoice()
         }
     }
-
-    // ✅ Header Section
-    var headerSection: some View {
-        VStack(spacing: 8) {
-            Text("My AI Director")
-                .font(.system(size: 32, weight: .bold))
-                .foregroundStyle(.white)
-            Text("Choose Your Voice")
-                .foregroundStyle(.white.opacity(0.9))
-                .font(.title2.bold())
-
-            SegmentedToggle(options: ["Female", "Male"], selected: $selectedGender)
-                .padding(.top, 8)
-        }
-    }
-
-    // ✅ Voice Grid with Glass Effect
-    var voiceGridSection: some View {
-        LazyVGrid(columns: columns, spacing: 16) {
-            ForEach(selectedGender == "Female" ? femaleVoices : maleVoices, id: \.self) { voice in
-                Button(action: { selectedVoice = voice }) {
-                    HStack(spacing: 8) {
-                        Text(voice)
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.white)
-                        Image(systemName: "waveform")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(height: 16)
-                            .foregroundColor(.white)
-                    }
-                    .padding(12)
-                    .frame(maxWidth: .infinity)
-                    .background(
-                        ZStack {
-                            Color.black.opacity(0.25)
-                            if selectedVoice == voice {
-                                LinearGradient(
-                                    colors: [
-                                        Color("ButtonGradient1").opacity(0.3),
-                                        Color("ButtonGradient3").opacity(0.3)
-                                    ],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            }
-                        }
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(selectedVoice == voice ? Color("ButtonGradient2") : Color.white.opacity(0.3), lineWidth: 1.5)
-                    )
-                }
-            }
-        }
-        .frame(maxWidth: 380)
-        .padding(.top, 10)
-    }
-
-    // ✅ Audio Player with Script Preview
-    var audioPlayerSection: some View {
-        VStack(spacing: 14) {
-            // Glass card for script
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color.black.opacity(0.3))
-                .overlay(
-                    ScrollView {
-                        Text(project.script) // ✅ Full script displayed
-                            .padding(16)
-                            .font(.system(size: 14))
-                            .foregroundColor(.white)
-                            .multilineTextAlignment(.leading)
-                    }
-                )
-                .frame(height: 140)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16)
-                        .stroke(Color.white.opacity(0.15), lineWidth: 1)
-                )
-
-            // Playback controls
-            HStack {
-                Text("0:00")
-                    .foregroundColor(.white)
-                    .font(.caption)
-                Slider(value: .constant(0.5))
-                    .accentColor(.blue)
-                Text("1:34")
-                    .foregroundColor(.white)
-                    .font(.caption)
-            }
-            .padding(.horizontal, 12)
-
-            // Continue button
-            Button {
-                var updated = project
-                updated.progressStep = 2
-                projectViewModel.upsertAndNavigate(updated) {
-                    router.goToImages(project: $0)
-                }
-            } label: {
-                Text("Continue to Images")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(
-                        LinearGradient(
-                            colors: [
-                                Color("ButtonGradient1"),
-                                Color("ButtonGradient2"),
-                                Color("ButtonGradient3")
-                            ],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: 18))
-                    .shadow(color: .black.opacity(0.25), radius: 6, x: 0, y: 4)
-            }
-            .padding(.top, 10)
-        }
-        .padding(.top, 16)
-    }
-
-    // ✅ Mock Voice Generation
-    func generateVoice() {
-        isGenerating = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-            audioURL = URL(string: "https://example.com/audio/\(selectedVoice).mp3")
-            isGenerating = false
-        }
-    }
-}
-
-#Preview {
-    VoiceScreen(project: VideoProject(
-        title: "Demo Project",
-        script: "Scene 1: A robot picks up a paintbrush.\nScene 2: The robot paints a sunset.",
-        thumbnail: "defaultThumbnail",
-        isCompleted: false,
-        progressStep: 1
-    ))
-    .environment(Router())
-    .environmentObject(ProjectsViewModel())
 }

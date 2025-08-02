@@ -185,6 +185,22 @@ struct ContentView: View {
             }
             .navigationBarHidden(true)
             .onReceive(speechRecognizer.$transcript) { topic = $0 }
+            .onAppear {
+                // ✅ Firebase Anonymous Login + Backend Sync
+                AuthManager.shared.signInAnonymously { result in
+                    switch result {
+                    case .success(let user):
+                        print("✅ Anonymous sign-in success: \(user.uid)")
+                        APIManager.shared.syncUser(
+                            firebaseUid: user.uid,
+                            email: user.email,
+                            username: "anonymous"
+                        )
+                    case .failure(let error):
+                        print("❌ Auth error: \(error.localizedDescription)")
+                    }
+                }
+            }
         }
     }
 
@@ -263,11 +279,7 @@ struct ContentView: View {
     private func fetchSurpriseTopic() async {
         isLoadingSurprise = true
         do {
-            #if targetEnvironment(simulator)
             let url = URL(string: "http://127.0.0.1:5001/api/script/create_random_topic")!
-            #else
-            let url = URL(string: "http://127.0.0.1:5001/api/script/create_random_topic")!
-            #endif
             var request = URLRequest(url: url)
             request.httpMethod = "POST"
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -289,3 +301,4 @@ struct ContentView: View {
 #Preview {
     ContentView().environment(Router())
 }
+

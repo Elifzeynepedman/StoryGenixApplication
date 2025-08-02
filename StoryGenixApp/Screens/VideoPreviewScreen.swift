@@ -29,6 +29,9 @@ struct VideoPreviewScreen: View {
                     Text("Preview Your Video")
                         .font(.title2.bold())
                         .foregroundColor(.white.opacity(0.9))
+                    Text("Step 4 out of 4")
+                        .font(.system(size: 12, weight: .light))
+                        .foregroundColor(.white.opacity(0.9))
                 }
                 .padding(.top, 40)
 
@@ -126,13 +129,14 @@ struct VideoPreviewScreen: View {
                 // Generate / Regenerate button
                 if currentScene.videoURL == nil {
                     PrimaryGradientButton(title: "Generate Video", isLoading: viewModel.isLoading) {
-                        viewModel.generateVideo(for: viewModel.currentSceneIndex)
+                        viewModel.generateVideo(for: viewModel.currentSceneIndex, projectId: project.backendId ?? "")
                     }
+
                 } else {
                     HStack {
                         Spacer()
                         Button {
-                            viewModel.generateVideo(for: viewModel.currentSceneIndex)
+                            viewModel.generateVideo(for: viewModel.currentSceneIndex, projectId: project.backendId ?? "")
                         } label: {
                             HStack(spacing: 6) {
                                 Image(systemName: "arrow.clockwise")

@@ -33,6 +33,9 @@ struct ScriptScreen: View {
                     Text("Choose your script")
                         .font(.title2.bold())
                         .foregroundColor(.white.opacity(0.9))
+                    Text("Step 1 out of 4")
+                        .font(.system(size: 12, weight: .light))
+                        .foregroundColor(.white.opacity(0.9))
                 }
                 .padding(.top, 40)
                 

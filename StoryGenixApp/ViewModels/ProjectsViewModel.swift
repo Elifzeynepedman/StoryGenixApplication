@@ -7,6 +7,7 @@
 
 import Foundation
 
+@MainActor
 class ProjectsViewModel: ObservableObject {
     @Published var allProjects: [VideoProject] = []
 
@@ -20,7 +21,6 @@ class ProjectsViewModel: ObservableObject {
             ProjectStorageManager.save(allProjects)
         }
     }
-
 
     func updateProject(_ updated: VideoProject) {
         if let index = allProjects.firstIndex(where: { $0.id == updated.id }) {
@@ -58,16 +58,25 @@ class ProjectsViewModel: ObservableObject {
         print("Resuming: \(project.title) at step \(project.progressStep)")
         router.goToStep(for: project)
     }
-    
-    func upsertAndNavigate(_ project: VideoProject, route: (VideoProject) -> Void) {
-        if self.project(for: project.id) != nil {
-            updateProject(project)
+
+    func upsert(_ newProject: VideoProject) {
+        if project(for: newProject.id) != nil {
+            updateProject(newProject)
         } else {
-            addProject(project)
+            addProject(newProject)
         }
+    }
+
+
+    /// ✅ Upsert and then navigate
+    func upsertAndNavigate(_ project: VideoProject, route: (VideoProject) -> Void) {
+        upsert(project)
         route(project)
     }
+
     func resetProjects() {
         allProjects.removeAll()
+        ProjectStorageManager.save(allProjects)
     }
 }
+

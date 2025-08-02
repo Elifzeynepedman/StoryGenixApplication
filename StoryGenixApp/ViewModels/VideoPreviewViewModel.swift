@@ -25,19 +25,44 @@ class VideoPreviewViewModel: ObservableObject {
         scenes[index].prompt = newPrompt
     }
 
-    func generateVideo(for index: Int) {
+    func generateVideo(for index: Int, projectId: String) {
         guard scenes.indices.contains(index) else { return }
         isLoading = true
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            if let path = Bundle.main.path(forResource: "EfesVideo", ofType: "mp4") {
-                let url = URL(fileURLWithPath: path)
-                self.scenes[index].videoURL = url
-                print("✅ Video generated for scene \(index)")
-            } else {
-                print("❌ EfesVideo.mp4 not found in bundle.")
+        
+        Task {
+            do {
+                // Start video generation
+                let response = try await ApiService.shared.startVideoGeneration(
+                    projectId: projectId,
+                    videoScenes: scenes.map { ["text": $0.sceneText, "imageUrl": $0.previewImage ?? ""] },
+                    audioFile: "mock-audio.mp3", // Replace with real audio path later
+                    sceneAlignment: "sequential"
+                )
+                print("✅ Video job started: \(response.jobId)")
+                
+                // Poll until status is completed
+                var videoUrl: String? = nil
+                while videoUrl == nil {
+                    try await Task.sleep(nanoseconds: 2_000_000_000) // 2 seconds
+                    let statusResponse = try await ApiService.shared.getVideoStatus(projectId: projectId)
+                    print("📡 Status: \(statusResponse.status)")
+                    
+                    if statusResponse.status == "completed" {
+                        videoUrl = statusResponse.finalVideoUrl
+                    }
+                }
+                
+                DispatchQueue.main.async {
+                    if let urlString = videoUrl, let url = URL(string: urlString) {
+                        self.scenes[index].videoURL = url
+                    }
+                    self.isLoading = false
+                }
+            } catch {
+                print("❌ Error generating video: \(error)")
+                DispatchQueue.main.async { self.isLoading = false }
             }
-            self.isLoading = false
         }
     }
+
 }
