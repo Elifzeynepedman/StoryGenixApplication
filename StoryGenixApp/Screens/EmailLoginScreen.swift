@@ -232,4 +232,3 @@ struct EmailLoginScreen: View {
         }
     }
 }
-

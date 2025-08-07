@@ -1,0 +1,116 @@
+//
+//  Localizable.strings
+//  StoryGenix
+//
+//  Created by Elif Edman on 3.08.2025.
+//
+
+"choose_script" = "Wähle dein Drehbuch";
+"choose_voice" = "Wähle deine Stimme";
+"generate_images" = "Bilder generieren";
+"preview_video" = "Video-Vorschau";
+"video_ready" = "Dein Video ist bereit";
+"step_1" = "Schritt 1 von 4";
+"step_2" = "Schritt 2 von 4";
+"step_3" = "Schritt 3 von 4";
+"step_4" = "Schritt 4 von 4";
+
+"sign_in" = "Anmelden";
+"sign_up" = "Registrieren";
+"create_account" = "Konto erstellen";
+"sign_in_continue" = "Melde dich an, um fortzufahren";
+"continue_email" = "Mit E-Mail fortfahren";
+"continue_google" = "Mit Google fortfahren";
+"cancel" = "Abbrechen";
+
+"resume" = "Fortsetzen";
+"view" = "Ansehen";
+"status" = "Status";
+"unfinished_projects" = "Unvollständige Projekte";
+"completed_projects" = "Abgeschlossene Projekte";
+"my_projects" = "Meine Projekte";
+"no_projects" = "Noch keine Projekte";
+"start_first_video" = "Beginne mit deinem ersten Video";
+
+"continue_to_voice" = "Weiter zu Stimme";
+"continue_to_images" = "Weiter zu Bildern";
+"continue_to_video" = "Weiter zu Video";
+"continue_to_final" = "Weiter zum Abschluss";
+
+"generate_voice" = "Stimme generieren";
+"regenerate_voice" = "Stimme regenerieren";
+"regenerate_script" = "Drehbuch regenerieren";
+"generate_video" = "Video generieren";
+"regenerate_video" = "Video regenerieren";
+"regenerate_images" = "Bilder regenerieren";
+
+"please_select_image" = "Bitte wähle ein Bild aus, um fortzufahren";
+"please_generate_video" = "Bitte generiere das Video, um fortzufahren";
+
+"scene_indicator" = "Szene %d von %d";
+"previous" = "← Zurück";
+"next" = "Weiter →";
+
+"download_video" = "Video herunterladen";
+"share_video" = "Video teilen";
+"return_home" = "Zurück zur Startseite";
+"video_not_found" = "Video nicht gefunden";
+"video_saved" = "✅ Video in Fotos gespeichert";
+
+"generating_script" = "Drehbuch wird generiert...";
+"no_script_yet" = "Noch kein Drehbuch.";
+"write_script_placeholder" = "Schreibe dein Drehbuch hier...";
+"error_generating_script" = "Fehler beim Erstellen oder Generieren des Drehbuchs. Bitte versuche es erneut.";
+
+"female" = "Weiblich";
+"male" = "Männlich";
+"generated_script" = "Generiertes Drehbuch";
+
+"create_stunning_videos" = "Erstelle beeindruckende Videos in Sekunden";
+"what_video_create" = "Welches Video möchtest du erstellen?";
+"describe_topic" = "Beschreibe dein Thema hier...";
+"done" = "Fertig";
+"surprise_me" = "Überrasche mich";
+"please_enter_topic" = "Bitte gib ein Thema ein oder wähle eines aus.";
+"need_inspiration" = "Brauchst du Inspiration?";
+"idea_eye_storm" = "Das Auge des Sturms";
+"idea_robot_paint" = "Ein Roboter lernt zu malen";
+"idea_lost_temple" = "Der verlorene Tempel des Klangs";
+
+"settings_title" = "Einstellungen";
+"hello_guest" = "Hallo, Gast";
+"manage_account_preferences" = "Verwalte dein Konto und deine Einstellungen";
+
+"account_section" = "KONTO";
+"subscription" = "Abonnement";
+"pro" = "Pro";
+"user_id" = "Benutzer-ID";
+
+"app_section" = "APP";
+"app_settings" = "App-Einstellungen";
+"contact_us" = "Kontaktiere uns";
+
+"feedback_section" = "FEEDBACK";
+"improvements" = "Verbesserungen";
+"report_bug" = "Fehler melden";
+
+"info_section" = "INFO";
+"app_version" = "App-Version";
+
+"sign_in_or_create" = "Anmelden oder Konto erstellen";
+"log_out" = "Abmelden";
+"logout_confirmation" = "Möchtest du dich wirklich abmelden?";
+"cancel" = "Abbrechen";
+
+"content_languages" = "Inhaltssprachen";
+"choose_language" = "Sprache wählen";
+
+"onboarding_intro1_title" = "Erstelle beeindruckende KI-Videos";
+"onboarding_intro1_subtitle" = "Verwandle deine Ideen in professionelle Videos in Sekunden.";
+"onboarding_intro2_title" = "Dein kreatives Toolkit";
+"onboarding_intro2_subtitle" = "Erstelle Skripte, Stimmen, Bilder und Videos mühelos.";
+"onboarding_ready_title" = "Du bist bereit!";
+"onboarding_ready_subtitle" = "Beginne jetzt mit der Erstellung von großartigem Content mit StoryGenix.";
+"skip" = "Überspringen";
+"next" = "Weiter";
+"start_creating" = "Jetzt starten";

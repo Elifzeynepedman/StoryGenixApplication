@@ -61,5 +61,3 @@ struct CompletedProjectCard: View {
         }
     }
 }
-
-

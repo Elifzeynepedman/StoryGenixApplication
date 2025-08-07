@@ -168,6 +168,3 @@ struct VideoCompleteScreen: View {
         }
     }
 }
-
-
-

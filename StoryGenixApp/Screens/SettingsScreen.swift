@@ -230,4 +230,3 @@ struct SettingsScreen: View {
     SettingsScreen()
         .environment(Router())
 }
-

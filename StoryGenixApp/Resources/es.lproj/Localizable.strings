@@ -1,0 +1,116 @@
+//
+//  Localizable.strings
+//  StoryGenix
+//
+//  Created by Elif Edman on 3.08.2025.
+//
+
+"choose_script" = "Elige tu guion";
+"choose_voice" = "Elige tu voz";
+"generate_images" = "Generar Imágenes";
+"preview_video" = "Previsualiza tu vídeo";
+"video_ready" = "Tu vídeo está listo";
+"step_1" = "Paso 1 de 4";
+"step_2" = "Paso 2 de 4";
+"step_3" = "Paso 3 de 4";
+"step_4" = "Paso 4 de 4";
+
+"sign_in" = "Iniciar sesión";
+"sign_up" = "Registrarse";
+"create_account" = "Crear cuenta";
+"sign_in_continue" = "Inicia sesión para continuar";
+"continue_email" = "Continuar con correo electrónico";
+"continue_google" = "Continuar con Google";
+"cancel" = "Cancelar";
+
+"resume" = "Reanudar";
+"view" = "Ver";
+"status" = "Estado";
+"unfinished_projects" = "Proyectos sin terminar";
+"completed_projects" = "Proyectos completados";
+"my_projects" = "Mis Proyectos";
+"no_projects" = "Aún no hay proyectos";
+"start_first_video" = "Comienza creando tu primer vídeo";
+
+"continue_to_voice" = "Continuar a Voz";
+"continue_to_images" = "Continuar a Imágenes";
+"continue_to_video" = "Continuar a Vídeo";
+"continue_to_final" = "Continuar al Final";
+
+"generate_voice" = "Generar voz";
+"regenerate_voice" = "Regenerar voz";
+"regenerate_script" = "Regenerar guion";
+"generate_video" = "Generar vídeo";
+"regenerate_video" = "Regenerar vídeo";
+"regenerate_images" = "Regenerar imágenes";
+
+"please_select_image" = "Por favor selecciona una imagen para continuar";
+"please_generate_video" = "Por favor genera el vídeo para continuar";
+
+"scene_indicator" = "Escena %d de %d";
+"previous" = "← Anterior";
+"next" = "Siguiente →";
+
+"download_video" = "Descargar vídeo";
+"share_video" = "Compartir vídeo";
+"return_home" = "Volver al inicio";
+"video_not_found" = "Vídeo no encontrado";
+"video_saved" = "✅ Vídeo guardado en Fotos";
+
+"generating_script" = "Generando guion...";
+"no_script_yet" = "Aún no hay guion.";
+"write_script_placeholder" = "Escribe tu guion aquí...";
+"error_generating_script" = "Error al crear o generar el guion. Intenta de nuevo.";
+
+"female" = "Femenino";
+"male" = "Masculino";
+"generated_script" = "Guion generado";
+
+"create_stunning_videos" = "Crea videos impresionantes en segundos";
+"what_video_create" = "¿Qué video te gustaría crear?";
+"describe_topic" = "Describe tu tema aquí...";
+"done" = "Hecho";
+"surprise_me" = "Sorpréndeme";
+"please_enter_topic" = "Por favor, ingresa un tema o elige uno.";
+"need_inspiration" = "¿Necesitas inspiración?";
+"idea_eye_storm" = "El ojo de la tormenta";
+"idea_robot_paint" = "Un robot aprende a pintar";
+"idea_lost_temple" = "El templo perdido del sonido";
+
+"settings_title" = "Configuración";
+"hello_guest" = "Hola, Invitado";
+"manage_account_preferences" = "Administra tu cuenta y preferencias";
+
+"account_section" = "CUENTA";
+"subscription" = "Suscripción";
+"pro" = "Pro";
+"user_id" = "ID de usuario";
+
+"app_section" = "APLICACIÓN";
+"app_settings" = "Ajustes de la aplicación";
+"contact_us" = "Contáctanos";
+
+"feedback_section" = "COMENTARIOS";
+"improvements" = "Mejoras";
+"report_bug" = "Informar un error";
+
+"info_section" = "INFORMACIÓN";
+"app_version" = "Versión de la aplicación";
+
+"sign_in_or_create" = "Inicia sesión o crea una cuenta";
+"log_out" = "Cerrar sesión";
+"logout_confirmation" = "¿Estás seguro de que quieres cerrar sesión?";
+"cancel" = "Cancelar";
+
+"content_languages" = "Idiomas del contenido";
+"choose_language" = "Elige el idioma";
+
+"onboarding_intro1_title" = "Crea videos impresionantes con IA";
+"onboarding_intro1_subtitle" = "Convierte tus ideas en videos profesionales en segundos.";
+"onboarding_intro2_title" = "Tu kit creativo";
+"onboarding_intro2_subtitle" = "Genera guiones, voces, imágenes y videos fácilmente.";
+"onboarding_ready_title" = "¡Estás listo!";
+"onboarding_ready_subtitle" = "Comienza a crear contenido increíble con StoryGenix.";
+"skip" = "Omitir";
+"next" = "Siguiente";
+"start_creating" = "Comenzar a crear";

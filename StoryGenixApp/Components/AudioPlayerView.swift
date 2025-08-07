@@ -119,4 +119,3 @@ struct AudioPlayerView: View {
         return String(format: "%d:%02d", minutes, seconds)
     }
 }
-

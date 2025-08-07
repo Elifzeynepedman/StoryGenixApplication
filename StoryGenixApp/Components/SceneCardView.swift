@@ -86,4 +86,3 @@ struct SceneCardView: View {
         }
     }
 }
-

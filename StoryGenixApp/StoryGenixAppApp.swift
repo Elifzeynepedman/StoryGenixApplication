@@ -9,19 +9,23 @@ import SwiftUI
 import Firebase
 import GoogleSignIn
 
-
 @main
 struct StoryGenixAppApp: App {
-    
+    @State private var hasSeenOnboarding = false
+    @State private var router = Router()
+
     init() {
         FirebaseApp.configure()
     }
 
     var body: some Scene {
         WindowGroup {
-            MainTabView()
+            if hasSeenOnboarding {
+                MainTabView()
+                    .environment(router)
+            } else {
+                OnboardingView(hasSeenOnboarding: $hasSeenOnboarding)
+                    .environment(router)
+            }
         }
-    }
-}
-
- 
+    }}

@@ -223,6 +223,10 @@
 			knownRegions = (
 				en,
 				Base,
+				tr,
+				fr,
+				de,
+				es,
 			);
 			mainGroup = 8FCDFA342E113F540094D0C2;
 			minimizedProjectReferenceProxies = 1;
@@ -435,6 +439,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = StoryGenixApp/Info.plist;
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "This app needs local network access to connect to your development server.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "This app saves videos you create to your photo library.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app needs access to your photo library to preview and share videos.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -467,6 +472,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = StoryGenixApp/Info.plist;
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "This app needs local network access to connect to your development server.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "This app saves videos you create to your photo library.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app needs access to your photo library to preview and share videos.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;

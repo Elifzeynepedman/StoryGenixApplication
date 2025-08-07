@@ -1,0 +1,116 @@
+//
+//  Localizable.strings
+//  StoryGenix
+//
+//  Created by Elif Edman on 3.08.2025.
+//
+
+"choose_script" = "Choisissez votre script";
+"choose_voice" = "Choisissez votre voix";
+"generate_images" = "Générer des images";
+"preview_video" = "Aperçu de la vidéo";
+"video_ready" = "Votre vidéo est prête";
+"step_1" = "Étape 1 sur 4";
+"step_2" = "Étape 2 sur 4";
+"step_3" = "Étape 3 sur 4";
+"step_4" = "Étape 4 sur 4";
+
+"sign_in" = "Se connecter";
+"sign_up" = "S'inscrire";
+"create_account" = "Créer un compte";
+"sign_in_continue" = "Connectez-vous pour continuer";
+"continue_email" = "Continuer avec l'e-mail";
+"continue_google" = "Continuer avec Google";
+"cancel" = "Annuler";
+
+"resume" = "Reprendre";
+"view" = "Voir";
+"status" = "Statut";
+"unfinished_projects" = "Projets inachevés";
+"completed_projects" = "Projets terminés";
+"my_projects" = "Mes projets";
+"no_projects" = "Aucun projet pour l'instant";
+"start_first_video" = "Commencez par créer votre première vidéo";
+
+"continue_to_voice" = "Continuer vers la voix";
+"continue_to_images" = "Continuer vers les images";
+"continue_to_video" = "Continuer vers la vidéo";
+"continue_to_final" = "Continuer vers la fin";
+
+"generate_voice" = "Générer la voix";
+"regenerate_voice" = "Régénérer la voix";
+"regenerate_script" = "Régénérer le script";
+"generate_video" = "Générer la vidéo";
+"regenerate_video" = "Régénérer la vidéo";
+"regenerate_images" = "Régénérer les images";
+
+"please_select_image" = "Veuillez sélectionner une image pour continuer";
+"please_generate_video" = "Veuillez générer la vidéo pour continuer";
+
+"scene_indicator" = "Scène %d sur %d";
+"previous" = "← Précédent";
+"next" = "Suivant →";
+
+"download_video" = "Télécharger la vidéo";
+"share_video" = "Partager la vidéo";
+"return_home" = "Retour à l'accueil";
+"video_not_found" = "Vidéo non trouvée";
+"video_saved" = "✅ Vidéo enregistrée dans Photos";
+
+"generating_script" = "Génération du script...";
+"no_script_yet" = "Aucun script pour l'instant.";
+"write_script_placeholder" = "Écrivez votre script ici...";
+"error_generating_script" = "Échec de la création ou de la génération du script. Veuillez réessayer.";
+
+"female" = "Féminin";
+"male" = "Masculin";
+"generated_script" = "Script généré";
+
+"create_stunning_videos" = "Créez des vidéos incroyables en quelques secondes";
+"what_video_create" = "Quelle vidéo souhaitez-vous créer ?";
+"describe_topic" = "Décrivez votre sujet ici...";
+"done" = "Terminé";
+"surprise_me" = "Surprenez-moi";
+"please_enter_topic" = "Veuillez entrer un sujet ou en choisir un.";
+"need_inspiration" = "Besoin d'inspiration ?";
+"idea_eye_storm" = "L'œil de la tempête";
+"idea_robot_paint" = "Un robot apprend à peindre";
+"idea_lost_temple" = "Le temple perdu du son";
+
+"settings_title" = "Paramètres";
+"hello_guest" = "Bonjour, Invité";
+"manage_account_preferences" = "Gérez votre compte et vos préférences";
+
+"account_section" = "COMPTE";
+"subscription" = "Abonnement";
+"pro" = "Pro";
+"user_id" = "ID utilisateur";
+
+"app_section" = "APPLICATION";
+"app_settings" = "Paramètres de l'application";
+"contact_us" = "Contactez-nous";
+
+"feedback_section" = "COMMENTAIRES";
+"improvements" = "Améliorations";
+"report_bug" = "Signaler un bug";
+
+"info_section" = "INFO";
+"app_version" = "Version de l'application";
+
+"sign_in_or_create" = "Se connecter ou créer un compte";
+"log_out" = "Se déconnecter";
+"logout_confirmation" = "Êtes-vous sûr de vouloir vous déconnecter ?";
+"cancel" = "Annuler";
+
+"content_languages" = "Langues du contenu";
+"choose_language" = "Choisir la langue";
+
+"onboarding_intro1_title" = "Créez des vidéos IA époustouflantes";
+"onboarding_intro1_subtitle" = "Transformez vos idées en vidéos professionnelles en quelques secondes.";
+"onboarding_intro2_title" = "Votre boîte à outils créative";
+"onboarding_intro2_subtitle" = "Générez des scripts, des voix, des images et des vidéos facilement.";
+"onboarding_ready_title" = "Vous êtes prêt !";
+"onboarding_ready_subtitle" = "Commencez à créer du contenu incroyable avec StoryGenix.";
+"skip" = "Passer";
+"next" = "Suivant";
+"start_creating" = "Commencer à créer";

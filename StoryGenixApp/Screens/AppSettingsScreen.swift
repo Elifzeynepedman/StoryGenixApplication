@@ -138,4 +138,3 @@ struct AppSettingsScreen: View {
         .environment(Router())
         .environmentObject(ProjectsViewModel())
 }
-

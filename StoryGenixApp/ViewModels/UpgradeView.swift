@@ -48,4 +48,3 @@ struct UpgradeView: View {
         .padding()
     }
 }
-

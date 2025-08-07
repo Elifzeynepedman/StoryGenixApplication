@@ -1,0 +1,124 @@
+
+"choose_script" = "Choose your script";
+"choose_voice" = "Choose Your Voice";
+"generate_images" = "Generate Images";
+"preview_video" = "Preview Your Video";
+"video_ready" = "Your Video is Ready";
+"step_1" = "Step 1 of 4";
+"step_2" = "Step 2 of 4";
+"step_3" = "Step 3 of 4";
+"step_4" = "Step 4 of 4";
+
+"sign_in" = "Sign In";
+"sign_up" = "Sign Up";
+"create_account" = "Create Account";
+"sign_in_continue" = "Sign in to Continue";
+"continue_email" = "Continue with Email";
+"continue_google" = "Continue with Google";
+"cancel" = "Cancel";
+
+"resume" = "Resume";
+"view" = "View";
+"status" = "Status";
+"unfinished_projects" = "Unfinished Projects";
+"completed_projects" = "Completed Projects";
+"my_projects" = "My Projects";
+"no_projects" = "No Projects Yet";
+"start_first_video" = "Start by creating your first video";
+
+"continue_to_voice" = "Continue to Voice";
+"continue_to_images" = "Continue to Images";
+"continue_to_video" = "Continue to Video";
+"continue_to_final" = "Continue to Final";
+
+"generate_voice" = "Generate Voice";
+"regenerate_voice" = "Regenerate Voice";
+"regenerate_script" = "Regenerate Script";
+"generate_video" = "Generate Video";
+"regenerate_video" = "Regenerate Video";
+"regenerate_images" = "Regenerate Images";
+
+"please_select_image" = "Please select an image to continue";
+"please_generate_video" = "Please generate the video to continue";
+
+"scene_indicator" = "Scene %d of %d";
+"previous" = "← Previous";
+"next" = "Next →";
+
+"download_video" = "Download Video";
+"share_video" = "Share Video";
+"return_home" = "Return to Home";
+"video_not_found" = "Video not found";
+"video_saved" = "✅ Video saved to Photos";
+
+"generating_script" = "Generating script...";
+"no_script_yet" = "No script yet.";
+"write_script_placeholder" = "Write your script here...";
+"error_generating_script" = "Failed to create or generate script. Please try again.";
+
+"female" = "Female";
+"male" = "Male";
+"generated_script" = "Generated Script";
+
+"create_stunning_videos" = "Create stunning videos in seconds";
+"what_video_create" = "What video would you like to create?";
+"describe_topic" = "Describe your topic here...";
+"done" = "Done";
+"surprise_me" = "Surprise Me";
+"please_enter_topic" = "Please enter a topic or pick one.";
+"need_inspiration" = "Need inspiration?";
+"idea_eye_storm" = "The Eye of a Storm";
+"idea_robot_paint" = "A Robot Learns to Paint";
+"idea_lost_temple" = "The Lost Temple of Sound";
+
+"settings_title" = "Settings";
+"hello_guest" = "Hello, Guest";
+"manage_account_preferences" = "Manage your account and preferences";
+
+"account_section" = "ACCOUNT";
+"subscription" = "Subscription";
+"pro" = "Pro";
+"user_id" = "User ID";
+
+"app_section" = "APP";
+"app_settings" = "App Settings";
+"contact_us" = "Contact Us";
+
+"feedback_section" = "FEEDBACK";
+"improvements" = "Improvements";
+"report_bug" = "Report a Bug";
+
+"info_section" = "INFO";
+"app_version" = "App Version";
+
+"sign_in_or_create" = "Sign In or Create Account";
+"log_out" = "Log Out";
+"logout_confirmation" = "Are you sure you want to log out?";
+"cancel" = "Cancel";
+
+"content_languages" = "Content Languages";
+"choose_language" = "Choose Language";
+
+"onboarding_welcome_title" = "Welcome to StoryGenix!";
+"onboarding_welcome_subtitle" = "Create stunning videos in minutes with AI.";
+"onboarding_ready_title" = "You're All Set!";
+"onboarding_ready_subtitle" = "Let's start creating your first masterpiece.";
+"start_creating" = "Start Creating";
+"next" = "Next";
+"skip" = "Skip";
+"choose_language" = "Choose Language";
+"choose_goal" = "What do you want to create?";
+"goal_social" = "Social Media Video";
+"goal_educational" = "Educational Clip";
+"goal_story" = "Story / Short Film";
+
+
+"onboarding_intro1_title" = "Create Stunning AI Videos";
+"onboarding_intro1_subtitle" = "Turn your ideas into professional videos in seconds.";
+"onboarding_intro2_title" = "Your Creative Toolkit";
+"onboarding_intro2_subtitle" = "Generate scripts, voices, images, and videos effortlessly.";
+"onboarding_ready_title" = "You’re Ready!";
+"onboarding_ready_subtitle" = "Start creating amazing content with StoryGenix now.";
+"skip" = "Skip";
+"next" = "Next";
+"start_creating" = "Start Creating";

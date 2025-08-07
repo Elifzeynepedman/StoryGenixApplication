@@ -1,0 +1,116 @@
+//
+//  Localizable.strings
+//  StoryGenix
+//
+//  Created by Elif Edman on 3.08.2025.
+//
+
+"choose_script" = "Senaryonu seç";
+"choose_voice" = "Sesini seç";
+"generate_images" = "Görselleri oluştur";
+"preview_video" = "Videonu önizle";
+"video_ready" = "Videon hazır";
+"step_1" = "Adım 1 / 4";
+"step_2" = "Adım 2 / 4";
+"step_3" = "Adım 3 / 4";
+"step_4" = "Adım 4 / 4";
+
+"sign_in" = "Giriş Yap";
+"sign_up" = "Kayıt Ol";
+"create_account" = "Hesap Oluştur";
+"sign_in_continue" = "Devam etmek için giriş yap";
+"continue_email" = "E-posta ile devam et";
+"continue_google" = "Google ile devam et";
+"cancel" = "İptal";
+
+"resume" = "Devam Et";
+"view" = "Görüntüle";
+"status" = "Durum";
+"unfinished_projects" = "Tamamlanmamış Projeler";
+"completed_projects" = "Tamamlanan Projeler";
+"my_projects" = "Projelerim";
+"no_projects" = "Henüz projeniz yok";
+"start_first_video" = "İlk videonu oluşturarak başla";
+
+"continue_to_voice" = "Sese Devam Et";
+"continue_to_images" = "Görsellere Devam Et";
+"continue_to_video" = "Videoya Devam Et";
+"continue_to_final" = "Sonraki Aşama";
+
+"generate_voice" = "Sesi Oluştur";
+"regenerate_voice" = "Sesi Yeniden Oluştur";
+"regenerate_script" = "Senaryoyu Yeniden Oluştur";
+"generate_video" = "Videoyu Oluştur";
+"regenerate_video" = "Videoyu Yeniden Oluştur";
+"regenerate_images" = "Görselleri Yeniden Oluştur";
+
+"please_select_image" = "Devam etmek için bir görsel seçin";
+"please_generate_video" = "Devam etmek için videoyu oluşturun";
+
+"scene_indicator" = "Sahne %d / %d";
+"previous" = "← Önceki";
+"next" = "Sonraki →";
+
+"download_video" = "Videoyu İndir";
+"share_video" = "Videoyu Paylaş";
+"return_home" = "Ana Sayfaya Dön";
+"video_not_found" = "Video bulunamadı";
+"video_saved" = "✅ Video Fotoğraflara kaydedildi";
+
+"generating_script" = "Senaryo oluşturuluyor...";
+"no_script_yet" = "Henüz senaryo yok.";
+"write_script_placeholder" = "Senaryonu buraya yaz...";
+"error_generating_script" = "Senaryo oluşturulamadı, lütfen tekrar deneyin.";
+
+"female" = "Kadın";
+"male" = "Erkek";
+"generated_script" = "Oluşturulan Senaryo";
+
+"create_stunning_videos" = "Saniyeler içinde harika videolar oluştur";
+"what_video_create" = "Hangi videoyu oluşturmak istersin?";
+"describe_topic" = "Konu hakkında yaz...";
+"done" = "Bitti";
+"surprise_me" = "Beni Şaşırt";
+"please_enter_topic" = "Lütfen bir konu gir veya birini seç.";
+"need_inspiration" = "İlham mı lazım?";
+"idea_eye_storm" = "Fırtınanın Gözü";
+"idea_robot_paint" = "Resim Yapmayı Öğrenen Robot";
+"idea_lost_temple" = "Kayıp Ses Tapınağı";
+
+"settings_title" = "Ayarlar";
+"hello_guest" = "Merhaba, Misafir";
+"manage_account_preferences" = "Hesabını ve tercihlerini yönet";
+
+"account_section" = "HESAP";
+"subscription" = "Abonelik";
+"pro" = "Pro";
+"user_id" = "Kullanıcı ID";
+
+"app_section" = "UYGULAMA";
+"app_settings" = "Uygulama Ayarları";
+"contact_us" = "Bize Ulaşın";
+
+"feedback_section" = "GERİ BİLDİRİM";
+"improvements" = "Geliştirme Önerileri";
+"report_bug" = "Hata Bildir";
+
+"info_section" = "BİLGİ";
+"app_version" = "Uygulama Sürümü";
+
+"sign_in_or_create" = "Giriş Yap veya Hesap Oluştur";
+"log_out" = "Çıkış Yap";
+"logout_confirmation" = "Çıkış yapmak istediğinize emin misiniz?";
+"cancel" = "İptal";
+
+"content_languages" = "İçerik Dilleri";
+"choose_language" = "Dili Seç";
+
+"onboarding_intro1_title" = "Muhteşem Yapay Zeka Videoları Oluştur";
+"onboarding_intro1_subtitle" = "Fikirlerini saniyeler içinde profesyonel videolara dönüştür.";
+"onboarding_intro2_title" = "Yaratıcı Araç Kutun";
+"onboarding_intro2_subtitle" = "Senaryo, ses, görseller ve videoları zahmetsizce oluştur.";
+"onboarding_ready_title" = "Hazırsın!";
+"onboarding_ready_subtitle" = "Hemen StoryGenix ile harika içerikler oluşturmaya başla.";
+"skip" = "Geç";
+"next" = "İleri";
+"start_creating" = "Oluşturmaya Başla";

@@ -84,4 +84,3 @@ struct ContactScreen: View {
     ContactScreen()
         .environment(Router())
 }
-

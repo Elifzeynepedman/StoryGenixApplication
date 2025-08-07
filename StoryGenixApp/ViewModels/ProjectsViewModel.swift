@@ -79,4 +79,3 @@ class ProjectsViewModel: ObservableObject {
         ProjectStorageManager.save(allProjects)
     }
 }
-
