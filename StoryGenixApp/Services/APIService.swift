@@ -4,9 +4,9 @@ class ApiService {
     static let shared = ApiService()
 
     #if targetEnvironment(simulator)
-    private let baseURL = "http://127.0.0.1:5001"
+    let baseURL = "http://127.0.0.1:5001"
     #else
-    private let baseURL = "http://192.168.1.247:5001" // ✅ Your LAN IP for physical device
+    let baseURL = "http://192.168.1.247:5001" // ✅ Your LAN IP for physical device
     #endif
 
     private init() {}

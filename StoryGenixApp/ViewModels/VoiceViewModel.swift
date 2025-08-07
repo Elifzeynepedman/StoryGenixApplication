@@ -9,16 +9,37 @@ import Foundation
 
 @MainActor
 class VoiceViewModel: ObservableObject {
+    struct Voice: Identifiable, Equatable {
+        let id: String         // This is the ElevenLabs voice ID
+        let label: String      // Human-readable name (e.g. "Rachel")
+    }
+
     @Published var selectedGender = "Female"
-    @Published var selectedVoice = "Jennie"
+    @Published var selectedVoice: Voice
     @Published var isGenerating = false
     @Published var audioURL: URL? = nil
     @Published var errorMessage: String? = nil
 
-    private let femaleVoices = ["Jennie", "Elif", "Sarah", "Katie"]
-    private let maleVoices = ["Brian", "David", "Alex", "Mike"]
+    private let femaleVoices: [Voice] = [
+        Voice(id: "21m00Tcm4TlvDq8ikWAM", label: "Rachel"),
+        Voice(id: "AZnzlk1XvdvUeBnXmlld", label: "Domi"),
+        Voice(id: "EXAVITQu4vr4xnSDxMaL", label: "Bella"),
+        Voice(id: "pNInz6obpgDQGcFmaJgB", label: "Sarah")
+    ]
 
-    func voicesForCurrentGender() -> [String] {
+    private let maleVoices: [Voice] = [
+        Voice(id: "TxGEqnHWrfWFTfGW9XjX", label: "Josh"),
+        Voice(id: "VR6AewLTigWG4xSOukaG", label: "Arnold"),
+        Voice(id: "ErXwobaYiN019PkySvjV", label: "Antoni"),
+        Voice(id: "MF3mGyEYCl7XYWbV9V6O", label: "Elli")
+    ]
+
+    init() {
+        // Default selected voice
+        self.selectedVoice = femaleVoices.first!
+    }
+
+    func voicesForCurrentGender() -> [Voice] {
         selectedGender == "Female" ? femaleVoices : maleVoices
     }
 
@@ -37,29 +58,27 @@ class VoiceViewModel: ObservableObject {
         defer { isGenerating = false }
 
         do {
-            // ✅ Call backend API
             let response = try await ApiService.shared.generateVoice(
                 projectId: projectId,
-                voiceId: selectedVoice,
+                voiceId: selectedVoice.id,
                 script: script,
                 sceneIndex: 0
             )
 
-            // ✅ Use actual backend audio URL
-            if let url = URL(string: response.audio_url) {
+            if let url = URL(string: ApiService.shared.baseURL + response.audio_url) {
                 audioURL = url
                 print("✅ Voice generated: \(url)")
-                return
             } else {
                 errorMessage = "Invalid audio URL from server."
             }
+
         } catch {
             print("⚠️ API Error: \(error.localizedDescription)")
             errorMessage = "Failed to generate voice. Please try again."
         }
 
-        // ✅ Optional: Remove fallback for production OR keep as backup
-        if let path = Bundle.main.path(forResource: "sample", ofType: "mp3") {
+        // Optional fallback
+        if audioURL == nil, let path = Bundle.main.path(forResource: "sample", ofType: "mp3") {
             audioURL = URL(fileURLWithPath: path)
             print("✅ Using bundled mock audio as fallback.")
         }

@@ -33,9 +33,11 @@ struct VoiceScreen: View {
 
                 // ✅ Voice Options Grid
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 14) {
-                    ForEach(viewModel.voicesForCurrentGender(), id: \.self) { voice in
-                        Button(action: { viewModel.selectedVoice = voice }) {
-                            Text(voice)
+                    ForEach(viewModel.voicesForCurrentGender()) { voice in
+                        Button(action: {
+                            viewModel.selectedVoice = voice
+                        }) {
+                            Text(voice.label)
                                 .font(.subheadline)
                                 .foregroundColor(.white)
                                 .padding(10)
@@ -103,7 +105,7 @@ struct VoiceScreen: View {
 
                         PrimaryGradientButton(title: "Continue to Images", isLoading: false) {
                             var updated = project
-                            updated.voiceId = viewModel.selectedVoice
+                            updated.voiceId = viewModel.selectedVoice.id
                             updated.audioURL = viewModel.audioURL?.absoluteString
                             updated.progressStep = .image
                             projectViewModel.upsertAndNavigate(updated) {
@@ -112,7 +114,7 @@ struct VoiceScreen: View {
                         }
                         .frame(maxWidth: 300)
                     }
-                    .padding(.top, 8)
+                    .padding(.top, 1)
                 }
 
                 Spacer()
