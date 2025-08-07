@@ -156,7 +156,14 @@ struct MainAppHomeView: View {
                                 showEmptyError = false
                             }
                         } else {
-                            router.goToScript(topic: trimmed)
+                            Task {
+                                do {
+                                    let project = try await ApiService.shared.createProject(title: trimmed, topic: trimmed)
+                                    router.goToScript(project: project)
+                                } catch {
+                                    print("❌ Failed to create project:", error.localizedDescription)
+                                }
+                            }
                         }
                     }) {
                         Text("Generate Video")
@@ -180,6 +187,7 @@ struct MainAppHomeView: View {
                     }
                     .padding(.top, 10)
                     .padding(.horizontal, 30)
+
 
                     // Error Message
                     if showEmptyError {

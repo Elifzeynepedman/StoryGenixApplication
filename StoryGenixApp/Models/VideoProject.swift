@@ -6,23 +6,31 @@ enum ProgressStep: Int, Codable {
     case image = 3
     case video = 4
     case completed = 5
+
+    init(status: String) {
+        switch status {
+        case "script_created": self = .script
+        case "voice_created": self = .voice
+        case "image_created": self = .image
+        case "video_created": self = .video
+        case "completed": self = .completed
+        default: self = .script // fallback
+        }
+    }
 }
 
 struct VideoProject: Identifiable, Codable, Hashable {
     let id: UUID
-    var backendId: String?
-    var title: String
-    var script: String
-    var thumbnail: String
-    var scenes: [VideoScene]
-    var sceneDescriptions: [String]
-    var imagePrompts: [String]
-    var klingPrompts: [String]
-    var voiceId: String?
-    var audioURL: String?
-    var selectedImageIndices: [Int: Int]
-    var videoURL: String?
-    var isCompleted: Bool
+    var backendId: String?        // backend project ID from API
+    var title: String             // project title
+    var script: String            // full script
+    var thumbnail: String         // cover image (can be placeholder)
+    var scenes: [VideoScene]      // each scene (text + prompt)
+    var voiceId: String?          // selected voice
+    var audioURL: String?         // generated voice audio
+    var selectedImageIndices: [Int: Int] // per-scene selected image index
+    var videoURL: String?         // final video file
+    var isCompleted: Bool         // flag for completion
     var progressStep: ProgressStep
     var currentSceneIndex: Int?
 
@@ -33,9 +41,6 @@ struct VideoProject: Identifiable, Codable, Hashable {
         script: String = "",
         thumbnail: String,
         scenes: [VideoScene] = [],
-        sceneDescriptions: [String] = [],
-        imagePrompts: [String] = [],
-        klingPrompts: [String] = [],
         voiceId: String? = nil,
         audioURL: String? = nil,
         selectedImageIndices: [Int: Int] = [:],
@@ -50,9 +55,6 @@ struct VideoProject: Identifiable, Codable, Hashable {
         self.script = script
         self.thumbnail = thumbnail
         self.scenes = scenes
-        self.sceneDescriptions = sceneDescriptions
-        self.imagePrompts = imagePrompts
-        self.klingPrompts = klingPrompts
         self.voiceId = voiceId
         self.audioURL = audioURL
         self.selectedImageIndices = selectedImageIndices

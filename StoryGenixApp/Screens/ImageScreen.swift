@@ -41,17 +41,14 @@ struct ImageScreen: View {
                         let currentScene = viewModel.scenes[viewModel.currentSceneIndex]
 
                         VStack(spacing: 16) {
-                            // ✅ Scene Indicator
                             Text("Scene \(viewModel.currentSceneIndex + 1) of \(viewModel.scenes.count)")
                                 .font(.subheadline)
                                 .foregroundColor(.white.opacity(0.8))
 
-                            // ✅ Scene Description
                             Text(currentScene.sceneText)
                                 .font(.headline)
                                 .foregroundColor(.white)
 
-                            // ✅ Prompt Editor
                             TextEditor(text: Binding(
                                 get: { currentScene.prompt },
                                 set: { viewModel.updatePrompt(for: viewModel.currentSceneIndex, newPrompt: $0) }
@@ -63,7 +60,6 @@ struct ImageScreen: View {
                             .background(Color.black.opacity(0.25))
                             .clipShape(RoundedRectangle(cornerRadius: 14))
 
-                            // ✅ Generate / Regenerate Button
                             if currentScene.generatedImages.isEmpty {
                                 PrimaryGradientButton(
                                     title: "Generate Images",
@@ -76,7 +72,7 @@ struct ImageScreen: View {
                                     }
                                 }
                             } else {
-                                // ✅ Regenerate Button
+                                // ✅ Regenerate button
                                 Button {
                                     if let backendId = project.backendId, !backendId.isEmpty {
                                         viewModel.generateImagesForCurrentScene(projectId: backendId)
@@ -91,7 +87,7 @@ struct ImageScreen: View {
                                     .padding(.vertical, 6)
                                 }
 
-                                // ✅ Image Grid
+                                // ✅ Image grid
                                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 14) {
                                     ForEach(currentScene.generatedImages, id: \.self) { img in
                                         Button {
@@ -128,7 +124,9 @@ struct ImageScreen: View {
                         if !currentScene.generatedImages.isEmpty {
                             HStack(spacing: 16) {
                                 if viewModel.currentSceneIndex > 0 {
-                                    Button("← Previous") { viewModel.currentSceneIndex -= 1 }
+                                    Button("← Previous") {
+                                        viewModel.currentSceneIndex -= 1
+                                    }
                                 }
                                 Spacer()
                                 if viewModel.currentSceneIndex < viewModel.scenes.count - 1 {
@@ -165,7 +163,7 @@ struct ImageScreen: View {
             }
             .padding(.horizontal)
 
-            // ✅ Selection Warning Toast
+            // ✅ Selection warning
             if showSelectionWarning {
                 VStack {
                     Spacer()
@@ -181,11 +179,7 @@ struct ImageScreen: View {
             }
         }
         .onAppear {
-            viewModel.loadScenes(
-                from: project.script,
-                sceneDetails: project.sceneDescriptions,
-                prompts: project.imagePrompts
-            )
+            viewModel.loadFromScenes(project.scenes)
         }
     }
 }

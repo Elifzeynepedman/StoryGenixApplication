@@ -67,8 +67,8 @@ struct MainTabView: View {
         switch route {
         case .home:
             ContentView()
-        case .script(let topic):
-            ScriptScreen(topic: topic)
+        case .script(let project):
+                ScriptScreen(project: project)
         case .voice(let project):
             VoiceScreen(project: project)
         case .images(let project):

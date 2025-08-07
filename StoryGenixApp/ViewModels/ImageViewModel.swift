@@ -95,4 +95,16 @@ class ImageViewModel: ObservableObject {
         guard scenes.indices.contains(index) else { return }
         scenes[index].prompt = newPrompt
     }
+    
+    func loadFromScenes(_ videoScenes: [VideoScene]) {
+        self.scenes = videoScenes.map {
+            ImageScene(
+                sceneText: $0.sceneText, // ← ✅ fixed
+                prompt: $0.prompt        // ← ✅ fixed
+            )
+        }
+        self.selectedImageIndices = Array(repeating: nil, count: self.scenes.count)
+        self.currentSceneIndex = 0
+    }
+
 }

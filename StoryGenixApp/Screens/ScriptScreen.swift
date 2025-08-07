@@ -1,162 +1,37 @@
 import SwiftUI
 
 struct ScriptScreen: View {
-    let topic: String
-    
+    let project: VideoProject
+
     @State private var mode = "Auto-Generated"
     @State private var customScriptText = ""
     @StateObject private var viewModel = ScriptLogicViewModel()
-    @State private var isCreatingProject = false
+    @State private var isLoading = false
     @State private var errorMessage: String?
-    
+
     @Environment(Router.self) private var router
     @EnvironmentObject private var projectViewModel: ProjectsViewModel
-    
+
     private var useAIGeneration: Bool { mode == "Auto-Generated" }
     private var currentScript: String {
         useAIGeneration ? viewModel.displayScript : customScriptText
     }
-    
+
     var body: some View {
         ZStack {
             Image("BackgroundImage")
                 .resizable()
                 .scaledToFill()
                 .ignoresSafeArea()
-            
+
             VStack(spacing: 24) {
-                // ✅ Header
-                VStack(spacing: 6) {
-                    Text("My AI Director")
-                        .font(.system(size: 36, weight: .bold))
-                        .foregroundColor(.white)
-                    Text("Choose your script")
-                        .font(.title2.bold())
-                        .foregroundColor(.white.opacity(0.9))
-                    Text("Step 1 out of 4")
-                        .font(.system(size: 12, weight: .light))
-                        .foregroundColor(.white.opacity(0.9))
-                }
-                .padding(.top, 40)
-                
-                // ✅ Mode Toggle
+                header
                 SegmentedToggle(options: ["Auto-Generated", "Write My Own"], selected: $mode)
                     .padding(.horizontal, 24)
-                
-                // ✅ Script Box
-                ZStack(alignment: .topLeading) {
-                    RoundedRectangle(cornerRadius: 18)
-                        .fill(Color.black.opacity(0.3))
-                        .overlay(
-                            LinearGradient(
-                                colors: [
-                                    Color("BackgroundGradientDark").opacity(0.15),
-                                    Color("BackgroundGradientPurple").opacity(0.1)
-                                ],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 18)
-                                .stroke(Color.white.opacity(0.15), lineWidth: 1)
-                        )
-                    
-                    if viewModel.isLoading {
-                        ProgressView("Generating script...")
-                            .foregroundColor(.white)
-                            .padding()
-                            .frame(maxWidth: .infinity, alignment: .center)
-                    } else if let error = viewModel.errorMessage {
-                        Text(error)
-                            .foregroundColor(.red)
-                            .font(.system(size: 16))
-                            .padding(16)
-                    } else if useAIGeneration {
-                        ScrollView {
-                            Text(viewModel.displayScript.isEmpty ? "No script yet." : viewModel.displayScript)
-                                .foregroundColor(.white)
-                                .font(.system(size: 16))
-                                .padding(16)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                        }
-                    } else {
-                        TextEditor(text: $customScriptText)
-                            .scrollContentBackground(.hidden) // ✅ Removes white default background
-                            .foregroundColor(.white)
-                            .padding(12)
-                            .overlay(
-                                Group {
-                                    if customScriptText.isEmpty {
-                                        Text("Write your script here...")
-                                            .foregroundColor(.white.opacity(0.6))
-                                            .padding(.horizontal, 12)
-                                            .padding(.vertical, 14)
-                                            .frame(maxWidth: .infinity, alignment: .leading)
-                                    }
-                                }
-                            )
-                    }
-                }
-                .frame(height: 350)
-                .padding(.horizontal, 24)
-                
-                // ✅ Continue Button
-                Button(action: {
-                    guard !currentScript.isEmpty else { return }
-                    Task {
-                        await createProjectAndContinue()
-                    }
-                }) {
-                    if isCreatingProject {
-                        ProgressView()
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                    } else {
-                        Text("Continue to Voice")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(
-                                LinearGradient(
-                                    colors: [
-                                        Color("ButtonGradient1"),
-                                        Color("ButtonGradient2"),
-                                        Color("ButtonGradient3")
-                                    ],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
-                            .clipShape(RoundedRectangle(cornerRadius: 18))
-                            .shadow(color: .black.opacity(0.25), radius: 6, x: 0, y: 4)
-                    }
-                }
-                .padding(.horizontal)
-                .disabled(currentScript.isEmpty || isCreatingProject)
-                
-                // ✅ Regenerate Button
-                if useAIGeneration {
-                    Button {
-                        Task { await viewModel.generateScript(for: topic) }
-                    } label: {
-                        if viewModel.isLoading {
-                            ProgressView().progressViewStyle(CircularProgressViewStyle(tint: .white))
-                        } else {
-                            HStack {
-                                Image(systemName: "arrow.clockwise")
-                                Text("Regenerate Script")
-                            }
-                            .font(.subheadline)
-                            .foregroundColor(.white.opacity(0.9))
-                        }
-                    }
-                    .padding(.top, 4)
-                }
-                
+                scriptBox
+                continueButton
+                if useAIGeneration { regenerateButton }
                 Spacer()
-                
                 if let error = errorMessage {
                     Text(error)
                         .foregroundColor(.red)
@@ -167,47 +42,171 @@ struct ScriptScreen: View {
         }
         .onAppear {
             if useAIGeneration && viewModel.script.isEmpty {
-                Task { await viewModel.generateScript(for: topic) }
+                Task { await viewModel.generateScript(for: project.title) }
             }
         }
     }
-    
-    private func createProjectAndContinue() async {
-        isCreatingProject = true
-        defer { isCreatingProject = false }
-        
+
+    // MARK: - UI Components
+
+    private var header: some View {
+        VStack(spacing: 6) {
+            Text("My AI Director")
+                .font(.system(size: 36, weight: .bold))
+                .foregroundColor(.white)
+            Text("Choose your script")
+                .font(.title2.bold())
+                .foregroundColor(.white.opacity(0.9))
+            Text("Step 1 out of 4")
+                .font(.system(size: 12, weight: .light))
+                .foregroundColor(.white.opacity(0.9))
+        }
+        .padding(.top, 40)
+    }
+
+    private var scriptBox: some View {
+        ZStack(alignment: .topLeading) {
+            RoundedRectangle(cornerRadius: 18)
+                .fill(Color.black.opacity(0.3))
+                .overlay(
+                    LinearGradient(
+                        colors: [
+                            Color("BackgroundGradientDark").opacity(0.15),
+                            Color("BackgroundGradientPurple").opacity(0.1)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 18)
+                        .stroke(Color.white.opacity(0.15), lineWidth: 1)
+                )
+
+            if viewModel.isLoading {
+                ProgressView("Generating script...")
+                    .foregroundColor(.white)
+                    .padding()
+                    .frame(maxWidth: .infinity, alignment: .center)
+            } else if let error = viewModel.errorMessage {
+                Text(error)
+                    .foregroundColor(.red)
+                    .font(.system(size: 16))
+                    .padding(16)
+            } else if useAIGeneration {
+                ScrollView {
+                    Text(currentScript.isEmpty ? "No script yet." : currentScript)
+                        .foregroundColor(.white)
+                        .font(.system(size: 16))
+                        .padding(16)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            } else {
+                TextEditor(text: $customScriptText)
+                    .scrollContentBackground(.hidden)
+                    .foregroundColor(.white)
+                    .padding(12)
+                    .overlay(
+                        Group {
+                            if customScriptText.isEmpty {
+                                Text("Write your script here...")
+                                    .foregroundColor(.white.opacity(0.6))
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 14)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                        }
+                    )
+            }
+        }
+        .frame(height: 350)
+        .padding(.horizontal, 24)
+    }
+
+    private var continueButton: some View {
+        Button(action: {
+            guard !currentScript.isEmpty else { return }
+            Task { await continueToVoice() }
+        }) {
+            if isLoading {
+                ProgressView().frame(maxWidth: .infinity).padding()
+            } else {
+                Text("Continue to Voice")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(
+                        LinearGradient(
+                            colors: [
+                                Color("ButtonGradient1"),
+                                Color("ButtonGradient2"),
+                                Color("ButtonGradient3")
+                            ],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .clipShape(RoundedRectangle(cornerRadius: 18))
+                    .shadow(color: .black.opacity(0.25), radius: 6, x: 0, y: 4)
+            }
+        }
+        .padding(.horizontal)
+        .disabled(currentScript.isEmpty || isLoading)
+    }
+
+    private var regenerateButton: some View {
+        Button {
+            Task { await viewModel.generateScript(for: project.title) }
+        } label: {
+            if viewModel.isLoading {
+                ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+            } else {
+                HStack {
+                    Image(systemName: "arrow.clockwise")
+                    Text("Regenerate Script")
+                }
+                .font(.subheadline)
+                .foregroundColor(.white.opacity(0.9))
+            }
+        }
+        .padding(.top, 4)
+    }
+
+    // MARK: - Logic
+
+    private func continueToVoice() async {
+        isLoading = true
+        defer { isLoading = false }
+
+        guard let backendId = project.backendId else {
+            errorMessage = "Project is missing backend ID. Cannot continue."
+            return
+        }
+
         do {
-            // ✅ 1. Create project
-            let projectResponse = try await ApiService.shared.createProject(title: topic, topic: topic)
-            let backendId = projectResponse._id
-            
-            // ✅ 2. Generate script and save scenes in backend
             let scriptResponse = try await ApiService.shared.generateScriptForProject(
                 projectId: backendId,
-                topic: topic
+                topic: project.title
             )
-            
-            // ✅ 3. Create local VideoProject
-            var newProject = VideoProject(
-                id: UUID(),
-                backendId: backendId,
-                title: topic,
-                script: scriptResponse.script,
-                thumbnail: "defaultThumbnail",
-                sceneDescriptions: scriptResponse.scenes.map { $0.text },
-                imagePrompts: scriptResponse.scenes.map { $0.imagePrompt },
-                klingPrompts: scriptResponse.scenes.map { $0.klingPrompt },
-                isCompleted: false,
-                progressStep: .voice // ✅ ENUM instead of Int
-            )
-            
-            // ✅ 4. Save and navigate
-            projectViewModel.upsertAndNavigate(newProject) {
+
+            var updatedProject = project
+            updatedProject.script = scriptResponse.script
+            updatedProject.scenes = scriptResponse.scenes.map {
+                VideoScene(
+                    sceneText: $0.text,
+                    prompt: $0.imagePrompt
+                )
+            }
+            updatedProject.progressStep = .voice
+
+            projectViewModel.upsertAndNavigate(updatedProject) {
                 router.goToVoice(project: $0)
             }
         } catch {
-            errorMessage = "Failed to create or generate script. Please try again."
-            print("Error creating project or generating script: \(error)")
+            errorMessage = "Failed to generate script. Please try again."
+            print("❌ Script error:", error.localizedDescription)
         }
     }
 }

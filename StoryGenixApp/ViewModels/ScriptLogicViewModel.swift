@@ -41,8 +41,10 @@ class ScriptLogicViewModel: ObservableObject {
             let projectResponse = try await ApiService.shared.createProject(title: topic, topic: topic)
             
             // ✅ 2. Generate script for this project
-            let response = try await ApiService.shared.generateScriptForProject(projectId: projectResponse._id, topic: topic)
-            
+            let response = try await ApiService.shared.generateScriptForProject(
+                projectId: projectResponse.backendId ?? "",
+                topic: topic
+            )
             self.script = response.script
             self.scenes = response.scenes
         } catch {

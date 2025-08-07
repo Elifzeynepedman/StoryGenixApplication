@@ -3,7 +3,7 @@ import Observation
 
 enum Route: Hashable {
     case home
-    case script(topic: String)
+    case script(project: VideoProject) // ← FIXED
     case voice(project: VideoProject)
     case images(project: VideoProject)
     case videopreview(project: VideoProject)
@@ -20,8 +20,8 @@ class Router {
         path = NavigationPath()
     }
 
-    func goToScript(topic: String) {
-        path.append(Route.script(topic: topic))
+    func goToScript(project: VideoProject) {
+        path.append(Route.script(project: project))
     }
     
     func goToVoice(project: VideoProject) {
@@ -51,7 +51,7 @@ class Router {
     func goToStep(for project: VideoProject) {
         switch project.progressStep {
         case .script:
-            goToScript(topic: project.title)
+            goToScript(project: project)
         case .voice:
             goToVoice(project: project)
         case .image:

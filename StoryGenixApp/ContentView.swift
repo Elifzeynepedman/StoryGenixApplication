@@ -186,7 +186,6 @@ struct ContentView: View {
             .navigationBarHidden(true)
             .onReceive(speechRecognizer.$transcript) { topic = $0 }
             .onAppear {
-                // ✅ Firebase Anonymous Login + Backend Sync
                 AuthManager.shared.signInAnonymously { result in
                     switch result {
                     case .success(let user):
@@ -196,6 +195,16 @@ struct ContentView: View {
                             email: user.email,
                             username: "anonymous"
                         )
+                        
+                        // ✅ Add this to print Firebase ID token
+                        user.getIDToken { token, error in
+                            if let token = token {
+                                print("✅ Firebase ID Token:\n\(token)")
+                            } else if let error = error {
+                                print("❌ Failed to get Firebase token:", error.localizedDescription)
+                            }
+                        }
+
                     case .failure(let error):
                         print("❌ Auth error: \(error.localizedDescription)")
                     }
@@ -269,11 +278,21 @@ struct ContentView: View {
         let trimmed = topic.trimmingCharacters(in: .whitespacesAndNewlines)
         if trimmed.isEmpty {
             showEmptyError = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2) { showEmptyError = false }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                showEmptyError = false
+            }
         } else {
-            router.goToScript(topic: trimmed)
+            Task {
+                do {
+                    let project = try await ApiService.shared.createProject(title: trimmed, topic: trimmed)
+                    router.goToScript(project: project)
+                } catch {
+                    print("❌ Failed to create project:", error.localizedDescription)
+                }
+            }
         }
     }
+
 
     @MainActor
     private func fetchSurpriseTopic() async {

@@ -136,20 +136,14 @@ struct VideoPreviewScreen: View {
                                     }
                                 } else {
                                     PrimaryGradientButton(title: "Continue to Final", isLoading: false) {
-                                        var updated = VideoProject(
-                                            id: project.id,
-                                            title: project.title,
-                                            script: project.script,
-                                            thumbnail: viewModel.scenes.first?.previewImage ?? "defaultThumbnail",
-                                            scenes: viewModel.scenes,
-                                            sceneDescriptions: project.sceneDescriptions,
-                                            imagePrompts: project.imagePrompts,
-                                            klingPrompts: project.klingPrompts,
-                                            isCompleted: true,
-                                            progressStep: .completed
-                                        )
+                                        var updated = project
+                                        updated.thumbnail = viewModel.scenes.first?.previewImage ?? "defaultThumbnail"
+                                        updated.scenes = viewModel.scenes
+                                        updated.progressStep = .completed
+                                        updated.isCompleted = true
                                         updated.currentSceneIndex = viewModel.currentSceneIndex
 
+                                        
                                         projectViewModel.upsertAndNavigate(updated) {
                                             router.goToVideoComplete(project: $0)
                                         }
@@ -181,26 +175,25 @@ struct VideoPreviewScreen: View {
         }
         .onAppear {
             // ✅ Load video scenes
-            viewModel.loadScenes(
-                script: project.script,
-                descriptions: project.sceneDescriptions,
-                klingPrompts: project.klingPrompts,
-                existingSelections: project.selectedImageIndices.map { $0.value }
-            )
+            viewModel.loadScenes(from: project.scenes)
 
             // ✅ Draft project update
             let draft = VideoProject(
                 id: project.id,
+                backendId: project.backendId,
                 title: project.title,
                 script: project.script,
                 thumbnail: viewModel.scenes.first?.previewImage ?? "defaultThumbnail",
                 scenes: viewModel.scenes,
-                sceneDescriptions: project.sceneDescriptions,
-                imagePrompts: project.imagePrompts,
-                klingPrompts: project.klingPrompts,
+                voiceId: project.voiceId,
+                audioURL: project.audioURL,
+                selectedImageIndices: project.selectedImageIndices,
+                videoURL: project.videoURL,
                 isCompleted: false,
-                progressStep: .video
+                progressStep: .video,
+                currentSceneIndex: viewModel.currentSceneIndex
             )
+
 
             projectViewModel.upsertAndNavigate(draft) { _ in }
         }

@@ -11,6 +11,25 @@ class AuthManager {
     static let shared = AuthManager()
 
     private init() {}
+    
+    func getFirebaseIdToken(completion: @escaping (String?) -> Void) {
+        guard let user = Auth.auth().currentUser else {
+            print("❌ No Firebase user found.")
+            completion(nil)
+            return
+        }
+
+        user.getIDToken { token, error in
+            if let error = error {
+                print("❌ Failed to get Firebase token:", error)
+                completion(nil)
+                return
+            }
+
+            print("✅ Firebase ID Token:", token ?? "nil")
+            completion(token)
+        }
+    }
 
     func signInAnonymously(completion: @escaping (Result<User, Error>) -> Void) {
         if let user = Auth.auth().currentUser {
