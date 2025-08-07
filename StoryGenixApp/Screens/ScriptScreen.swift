@@ -180,33 +180,19 @@ struct ScriptScreen: View {
         isLoading = true
         defer { isLoading = false }
 
-        guard let backendId = project.backendId else {
-            errorMessage = "Project is missing backend ID. Cannot continue."
-            return
-        }
-
-        do {
-            let scriptResponse = try await ApiService.shared.generateScriptForProject(
-                projectId: backendId,
-                topic: project.title
+        var updatedProject = project
+        updatedProject.script = currentScript // ✅ Use exactly what is shown to user
+        updatedProject.scenes = viewModel.scenes.map {
+            VideoScene(
+                sceneText: $0.text,
+                prompt: $0.imagePrompt
             )
+        }
+        
+        updatedProject.progressStep = .voice
 
-            var updatedProject = project
-            updatedProject.script = scriptResponse.script
-            updatedProject.scenes = scriptResponse.scenes.map {
-                VideoScene(
-                    sceneText: $0.text,
-                    prompt: $0.imagePrompt
-                )
-            }
-            updatedProject.progressStep = .voice
-
-            projectViewModel.upsertAndNavigate(updatedProject) {
-                router.goToVoice(project: $0)
-            }
-        } catch {
-            errorMessage = "Failed to generate script. Please try again."
-            print("❌ Script error:", error.localizedDescription)
+        projectViewModel.upsertAndNavigate(updatedProject) {
+            router.goToVoice(project: $0)
         }
     }
 }

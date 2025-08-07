@@ -65,6 +65,7 @@ struct VoiceScreen: View {
                             .cornerRadius(12)
                     }
                     .frame(height: 140)
+
                 }
                 .padding(.top, 12)
 
@@ -74,8 +75,7 @@ struct VoiceScreen: View {
                         Task {
                             await viewModel.generateVoice(
                                 projectId: project.backendId ?? "",
-                                script: project.script
-                            )
+                                script: project.script                            )
                         }
                     }
                     .frame(maxWidth: 300)
@@ -84,8 +84,7 @@ struct VoiceScreen: View {
                         Task {
                             await viewModel.generateVoice(
                                 projectId: project.backendId ?? "",
-                                script: project.script
-                            )
+                                script: project.script                            )
                         }
                     } label: {
                         HStack(spacing: 6) {
