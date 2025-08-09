@@ -145,8 +145,15 @@ class ApiService {
     }
 
     // MARK: - Scene-specific Image Generation
-    func generateImagesForScene(projectId: String, sceneIndex: Int, prompt: String, numImages: Int = 4, aspectRatio: String = "square") async throws -> [String] {
-        let url = URL(string: "\(baseURL)/api/scenes/generate-images")!
+    // MARK: - Scene-specific Image Generation (by Prompt)
+    func generateImagesForScene(
+        projectId: String,
+        sceneIndex: Int,
+        prompt: String,
+        numImages: Int = 4,
+        aspectRatio: String = "square"
+    ) async throws -> [String] {
+        let url = URL(string: "\(baseURL)/api/scenes/generate-scene")! // ✅ CORRECTED
         var request = try await authorizedRequest(for: url)
 
         let body: [String: Any] = [
@@ -160,10 +167,11 @@ class ApiService {
 
         let (data, response) = try await URLSession.shared.data(for: request)
         try validateResponse(response, data: data, domain: "ImageSceneAPI")
-
-        let json = try JSONDecoder().decode(ImageResponseModel.self, from: data)
-        return json.images.first ?? []
+        
+        let result = try JSONDecoder().decode(ImageSceneResponse.self, from: data)
+        return result.images.map { "\(baseURL)\($0)" }
     }
+
 
     // MARK: - Response Validator
     private func validateResponse(_ response: URLResponse, data: Data, domain: String) throws {
@@ -232,4 +240,11 @@ struct GenerateImagesRequest: Codable {
 struct GenerateVoiceResponse: Codable {
     let audio_url: String
     let lastStep: String
+}
+
+struct ImageSceneResponse: Codable {
+    let success: Bool
+    let projectId: String
+    let sceneIndex: Int
+    let images: [String]
 }

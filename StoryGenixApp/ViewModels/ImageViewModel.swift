@@ -53,33 +53,25 @@ class ImageViewModel: ObservableObject {
 
     // ✅ Generate images for the current scene only
     func generateImagesForCurrentScene(projectId: String) {
-        guard !projectId.isEmpty else {
-            print("❌ Error: Missing backend projectId")
-            return
-        }
-
-        let index = currentSceneIndex
-        guard scenes.indices.contains(index) else { return }
-
-        isSceneLoading[index] = true
-        scenes[index].generatedImages = []
+        let prompt = scenes[currentSceneIndex].prompt
+        let aspectRatio = mapAspectRatio(selectedAspect)
 
         Task {
             do {
                 let images = try await ApiService.shared.generateImagesForScene(
                     projectId: projectId,
-                    sceneIndex: index,
-                    prompt: scenes[index].prompt,
+                    sceneIndex: currentSceneIndex,
+                    prompt: prompt,
                     numImages: 4,
-                    aspectRatio: mapAspectRatio(selectedAspect)
+                    aspectRatio: aspectRatio
                 )
-                scenes[index].generatedImages = images
+                scenes[currentSceneIndex].generatedImages = images
             } catch {
-                print("❌ Error generating images for scene \(index): \(error.localizedDescription)")
+                print("❌ Error generating images for scene \(currentSceneIndex): \(error)")
             }
-            isSceneLoading[index] = false
         }
     }
+
 
     // ✅ Select image for current scene
     func selectImage(_ image: String, for index: Int) {
