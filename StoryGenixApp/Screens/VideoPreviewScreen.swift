@@ -14,9 +14,7 @@ struct VideoPreviewScreen: View {
     var body: some View {
         ZStack {
             // ✅ Background
-            Image("BackgroundImage")
-                .resizable()
-                .scaledToFill()
+            Color("Background")
                 .ignoresSafeArea()
 
             VStack(spacing: 20) {

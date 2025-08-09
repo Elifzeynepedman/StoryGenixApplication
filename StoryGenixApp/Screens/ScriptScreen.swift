@@ -9,40 +9,58 @@ struct ScriptScreen: View {
     @State private var isLoading = false
     @State private var errorMessage: String?
 
+    // Always-editable AI text buffer
+    @State private var aiText: String = ""
+
     @Environment(Router.self) private var router
     @EnvironmentObject private var projectViewModel: ProjectsViewModel
 
     private var useAIGeneration: Bool { mode == "Auto-Generated" }
-    private var currentScript: String {
-        useAIGeneration ? viewModel.displayScript : customScriptText
-    }
+    private var currentScript: String { useAIGeneration ? aiText : customScriptText }
 
     var body: some View {
         ZStack {
-            Image("BackgroundImage")
-                .resizable()
-                .scaledToFill()
-                .ignoresSafeArea()
+            Color("Background").ignoresSafeArea()
 
-            VStack(spacing: 24) {
+            VStack(spacing: 16) {
                 header
+
                 SegmentedToggle(options: ["Auto-Generated", "Write My Own"], selected: $mode)
                     .padding(.horizontal, 24)
-                scriptBox
-                continueButton
-                if useAIGeneration { regenerateButton }
-                Spacer()
-                if let error = errorMessage {
-                    Text(error)
-                        .foregroundColor(.red)
+
+                if useAIGeneration {
+                    Text("⚡ Generation usually takes ~20 seconds")
                         .font(.footnote)
-                        .padding(.top, 8)
+                        .foregroundColor(.white.opacity(0.7))
+                        .padding(.horizontal, 24)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
+
+                // 👉 Script alanı tüm kalan yüksekliği kaplar
+                scriptBox
+                    .frame(maxHeight: .infinity)
+                    .padding(.horizontal, 24)
+
+                continueButton
+                    .padding(.horizontal)
+
+                if useAIGeneration { regenerateButton }
+
+                // Alt tarafta ekstra boşluk istemiyorsan Spacer'ı kaldırıyoruz
             }
         }
+        .ignoresSafeArea(.keyboard) // klavye açılınca taşmayı engelle
         .onAppear {
             if useAIGeneration && viewModel.script.isEmpty {
                 Task { await viewModel.generateScript(for: project.title) }
+            }
+        }
+        .onChange(of: viewModel.displayScript) { newValue in
+            aiText = newValue
+        }
+        .onChange(of: mode) { newMode in
+            if newMode == "Auto-Generated" {
+                aiText = viewModel.displayScript
             }
         }
     }
@@ -65,7 +83,7 @@ struct ScriptScreen: View {
     }
 
     private var scriptBox: some View {
-        ZStack(alignment: .topLeading) {
+        ZStack {
             RoundedRectangle(cornerRadius: 18)
                 .fill(Color.black.opacity(0.3))
                 .overlay(
@@ -84,86 +102,83 @@ struct ScriptScreen: View {
                 )
 
             if viewModel.isLoading {
-                ProgressView("Generating script...")
-                    .foregroundColor(.white)
-                    .padding()
-                    .frame(maxWidth: .infinity, alignment: .center)
+                VStack(spacing: 12) {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        .scaleEffect(1.2)
+                    Text("Generating script...")
+                        .foregroundColor(.white.opacity(0.8))
+                        .font(.subheadline)
+                }
+                .padding(16)
             } else if let error = viewModel.errorMessage {
                 Text(error)
                     .foregroundColor(.red)
                     .font(.system(size: 16))
                     .padding(16)
             } else if useAIGeneration {
-                ScrollView {
-                    Text(currentScript.isEmpty ? "No script yet." : currentScript)
-                        .foregroundColor(.white)
-                        .font(.system(size: 16))
-                        .padding(16)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
+                TextEditor(text: $aiText)
+                    .scrollContentBackground(.hidden)
+                    .foregroundColor(.white)
+                    .padding(12)
+                    .overlay(alignment: .topLeading) {
+                        if aiText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            Text("Edit your AI-generated script…")
+                                .foregroundColor(.white.opacity(0.6))
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 14)
+                        }
+                    }
             } else {
                 TextEditor(text: $customScriptText)
                     .scrollContentBackground(.hidden)
                     .foregroundColor(.white)
                     .padding(12)
-                    .overlay(
-                        Group {
-                            if customScriptText.isEmpty {
-                                Text("Write your script here...")
-                                    .foregroundColor(.white.opacity(0.6))
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 14)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                            }
+                    .overlay(alignment: .topLeading) {
+                        if customScriptText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            Text("Write your script here...")
+                                .foregroundColor(.white.opacity(0.6))
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 14)
                         }
-                    )
+                    }
             }
         }
-        .frame(height: 350)
-        .padding(.horizontal, 24)
     }
 
     private var continueButton: some View {
         Button(action: {
-            guard !currentScript.isEmpty else { return }
+            guard !currentScript.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
             Task { await continueToVoice() }
         }) {
-            if isLoading {
-                ProgressView().frame(maxWidth: .infinity).padding()
-            } else {
-                Text("Continue to Voice")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(
-                        LinearGradient(
-                            colors: [
-                                Color("ButtonGradient1"),
-                                Color("ButtonGradient2"),
-                                Color("ButtonGradient3")
-                            ],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
+            Text("Continue to Voice")
+                .font(.headline)
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(
+                    LinearGradient(
+                        colors: [
+                            Color("ButtonGradient1"),
+                            Color("ButtonGradient2"),
+                            Color("ButtonGradient3")
+                        ],
+                        startPoint: .leading,
+                        endPoint: .trailing
                     )
-                    .clipShape(RoundedRectangle(cornerRadius: 18))
-                    .shadow(color: .black.opacity(0.25), radius: 6, x: 0, y: 4)
-            }
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 18))
+                .shadow(color: .black.opacity(0.25), radius: 6, x: 0, y: 4)
         }
-        .padding(.horizontal)
-        .disabled(currentScript.isEmpty || isLoading)
+        .disabled(currentScript.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isLoading)
     }
 
     private var regenerateButton: some View {
         Button {
             Task { await viewModel.generateScript(for: project.title) }
         } label: {
-            if viewModel.isLoading {
-                ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
-            } else {
-                HStack {
+            if !viewModel.isLoading {
+                HStack(spacing: 6) {
                     Image(systemName: "arrow.clockwise")
                     Text("Regenerate Script")
                 }
@@ -181,14 +196,10 @@ struct ScriptScreen: View {
         defer { isLoading = false }
 
         var updatedProject = project
-        updatedProject.script = currentScript // ✅ Use exactly what is shown to user
+        updatedProject.script = currentScript
         updatedProject.scenes = viewModel.scenes.map {
-            VideoScene(
-                sceneText: $0.text,
-                prompt: $0.imagePrompt
-            )
+            VideoScene(sceneText: $0.text, prompt: $0.imagePrompt)
         }
-        
         updatedProject.progressStep = .voice
 
         projectViewModel.upsertAndNavigate(updatedProject) {

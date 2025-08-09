@@ -19,9 +19,7 @@ struct SettingsScreen: View {
     var body: some View {
         ZStack {
             // ✅ Background
-            Image("BackgroundImage")
-                .resizable()
-                .scaledToFill()
+            Color("Background")
                 .ignoresSafeArea()
             
             ScrollView {

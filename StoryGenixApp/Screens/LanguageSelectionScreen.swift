@@ -21,9 +21,7 @@ struct LanguageSelectionScreen: View {
 
     var body: some View {
         ZStack {
-            Image("BackgroundImage")
-                .resizable()
-                .scaledToFill()
+            Color("Background")
                 .ignoresSafeArea()
 
             VStack(spacing: 20) {

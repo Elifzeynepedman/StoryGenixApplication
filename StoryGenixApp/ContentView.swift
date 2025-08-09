@@ -31,9 +31,7 @@ struct ContentView: View {
             GeometryReader { geo in
                 ZStack {
                     // ✅ Background
-                    Image("BackgroundImage")
-                        .resizable()
-                        .scaledToFill()
+                    Color("Background")
                         .ignoresSafeArea()
 
                     VStack(spacing: 24) {

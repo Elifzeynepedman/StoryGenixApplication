@@ -14,11 +14,8 @@ struct FeedbackModalView: View {
     var body: some View {
         ZStack {
             // ✅ Same Background as Main Screen
-            Image("BackgroundImage")
-                .resizable()
-                .scaledToFill()
+            Color("Background")
                 .ignoresSafeArea()
-                .overlay(Color.black.opacity(0.35)) // subtle dim effect
 
             VStack(spacing: 20) {
                 // ✅ Title
