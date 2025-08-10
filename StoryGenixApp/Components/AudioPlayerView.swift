@@ -1,8 +1,5 @@
-//
-//  AudioPlayerView.swift
-//  StoryGenix
-//
-
+import SwiftUI
+import AVFoundation
 
 import SwiftUI
 import AVFoundation
@@ -18,97 +15,67 @@ struct AudioPlayerView: View {
     @State private var timeObserver: Any?
 
     var body: some View {
-        VStack(spacing: 10) {
-            // progress + times
-            HStack {
-                Text(formatTime(currentTime)).foregroundColor(.white).font(.caption)
+        VStack(spacing: 6) { // tighter
+            // Progress + times
+            HStack(spacing: 8) {
+                Text(formatTime(currentTime))
+                    .foregroundColor(.white.opacity(0.9))
+                    .font(.caption2)
+                    .frame(width: 38, alignment: .leading)
 
                 Slider(value: Binding(
                     get: { progress },
                     set: { newValue in
                         progress = newValue
-                        seek(to: newValue * max(duration, 0))
+                        seek(to: newValue * duration)
                     }
                 ))
-                .tint(.white)
+                .tint(.white) // slim slider, default color
+                .frame(maxHeight: 24)
 
-                Text(formatTime(duration)).foregroundColor(.white).font(.caption)
+                Text(formatTime(duration))
+                    .foregroundColor(.white.opacity(0.9))
+                    .font(.caption2)
+                    .frame(width: 38, alignment: .trailing)
             }
-            .padding(.horizontal)
+            .padding(.horizontal, 6)
 
-            // play/pause
+            // Small Play / Pause
             Button(action: togglePlay) {
                 Image(systemName: isPlaying ? "pause.circle.fill" : "play.circle.fill")
-                    .resizable().frame(width: 48, height: 48).foregroundColor(.white)
+                    .resizable()
+                    .frame(width: 44, height: 44) // smaller button
+                    .foregroundColor(.white)
+                    .shadow(radius: 1)
             }
+            .padding(.top, 2)
         }
-        .onAppear {
-            buildPlayer(with: audioURL)
-            NotificationCenter.default.addObserver(forName: .stopAllAudio, object: nil, queue: .main) { _ in
-                pauseAndResetPlayState()
-            }
+        .onAppear { setupPlayer() }
+        .onChange(of: audioURL) { _ in
+            // Recreate the player to avoid caching old audio
+            replaceCurrentItem(with: audioURL)
         }
-        .onChange(of: audioURL) { newURL in
-            // 🔁 rebuild the item when URL changes (e.g., regeneration)
-            replaceItem(with: newURL)
-        }
-        .onDisappear {
-            teardown()
-        }
+        .onDisappear { cleanup() }
     }
 
-    // MARK: - Player wiring
+    // MARK: - Setup
 
-    private func buildPlayer(with url: URL) {
+    private func setupPlayer() {
         configureAudioSession()
-        let item = AVPlayerItem(url: url)
-        let newPlayer = AVPlayer(playerItem: item)
-        player = newPlayer
-        wireObservers(to: newPlayer)
+        replaceCurrentItem(with: audioURL)
     }
 
-    private func replaceItem(with url: URL) {
-        pauseAndResetPlayState()
-        let item = AVPlayerItem(url: url)
+    private func replaceCurrentItem(with url: URL) {
+        // Always build a fresh item (prevents stale audio after regenerate)
+        let playerItem = AVPlayerItem(url: url)
         if player == nil {
-            player = AVPlayer(playerItem: item)
+            player = AVPlayer(playerItem: playerItem)
         } else {
-            player?.replaceCurrentItem(with: item)
+            player?.replaceCurrentItem(with: playerItem)
         }
-        wireObservers(to: player)
-    }
-
-    private func wireObservers(to player: AVPlayer?) {
-        guard let player = player else { return }
-
-        // remove old observer if any
-        if let obs = timeObserver {
-            player.removeTimeObserver(obs)
-            timeObserver = nil
-        }
-
-        let interval = CMTime(seconds: 0.25, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
-        timeObserver = player.addPeriodicTimeObserver(forInterval: interval, queue: .main) { time in
-            let ct = CMTimeGetSeconds(time)
-            let total = CMTimeGetSeconds(player.currentItem?.duration ?? .zero)
-            if total.isFinite && total > 0 {
-                duration = total
-                currentTime = ct
-                progress = max(0, min(1, ct / total))
-            }
-        }
-
-        // observe when item becomes ready to get duration correctly
-        player.currentItem?.observe(\.status, options: [.new]) { item, _ in
-            if item.status == .readyToPlay {
-                let total = CMTimeGetSeconds(item.duration)
-                if total.isFinite {
-                    DispatchQueue.main.async {
-                        duration = total
-                    }
-                }
-            }
-        }
+        isPlaying = false
+        attachTimeObserver()
+        observeDuration()
     }
 
     private func configureAudioSession() {
@@ -116,28 +83,45 @@ struct AudioPlayerView: View {
             try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
             try AVAudioSession.sharedInstance().setActive(true)
         } catch {
-            print("⚠️ Audio session error: \(error)")
+            print("⚠️ Failed to configure audio session: \(error)")
         }
     }
 
-    private func teardown() {
-        if let obs = timeObserver {
-            player?.removeTimeObserver(obs)
-            timeObserver = nil
+    private func attachTimeObserver() {
+        guard let player = player else { return }
+        // Remove previous
+        if let observer = timeObserver { player.removeTimeObserver(observer) }
+        let interval = CMTime(seconds: 0.25, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
+        timeObserver = player.addPeriodicTimeObserver(forInterval: interval, queue: .main) { time in
+            let current = CMTimeGetSeconds(time)
+            currentTime = current
+            if let total = player.currentItem?.duration.seconds, total.isFinite, total > 0 {
+                duration = total
+                progress = current / total
+            }
         }
-        player?.pause()
-        player = nil
-        isPlaying = false
     }
 
-    private func pauseAndResetPlayState() {
-        player?.pause()
-        isPlaying = false
+    private func observeDuration() {
+        player?.currentItem?.observe(\.status, options: [.new]) { item, _ in
+            if item.status == .readyToPlay {
+                let total = item.duration.seconds
+                if total.isFinite {
+                    Task { @MainActor in duration = total }
+                }
+            }
+        }
     }
+
+    // MARK: - Controls
 
     private func togglePlay() {
         guard let player = player else { return }
-        if isPlaying { player.pause() } else { player.play() }
+        if isPlaying {
+            player.pause()
+        } else {
+            player.play()
+        }
         isPlaying.toggle()
     }
 
@@ -146,9 +130,22 @@ struct AudioPlayerView: View {
         player?.seek(to: time)
     }
 
-    private func formatTime(_ t: Double) -> String {
-        let m = Int(t) / 60
-        let s = Int(t) % 60
-        return String(format: "%d:%02d", m, s)
+    // MARK: - Cleanup
+
+    private func cleanup() {
+        if let observer = timeObserver {
+            player?.removeTimeObserver(observer)
+            timeObserver = nil
+        }
+        player?.pause()
+        player = nil
+    }
+
+    // MARK: - Utils
+
+    private func formatTime(_ time: Double) -> String {
+        let minutes = Int(time) / 60
+        let seconds = Int(time) % 60
+        return String(format: "%d:%02d", minutes, seconds)
     }
 }
