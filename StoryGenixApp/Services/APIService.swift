@@ -5,6 +5,7 @@ class ApiService {
 
     #if targetEnvironment(simulator)
     let baseURL = "http://127.0.0.1:5001"
+    
     #else
     let baseURL = "http://192.168.1.247:5001" // ✅ Your LAN IP for physical device
     #endif
