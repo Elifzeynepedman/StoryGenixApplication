@@ -6,10 +6,6 @@ struct ScriptScreen: View {
     @State private var mode = "Auto-Generated"
     @State private var customScriptText = ""
     @StateObject private var viewModel = ScriptLogicViewModel()
-    @State private var isLoading = false
-    @State private var errorMessage: String?
-
-    // Always-editable AI text buffer
     @State private var aiText: String = ""
 
     @Environment(Router.self) private var router
@@ -17,6 +13,12 @@ struct ScriptScreen: View {
 
     private var useAIGeneration: Bool { mode == "Auto-Generated" }
     private var currentScript: String { useAIGeneration ? aiText : customScriptText }
+
+    private var mainButtonText: String {
+        useAIGeneration && aiText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        ? "Generate Script"
+        : "Continue to Voice"
+    }
 
     var body: some View {
         ZStack {
@@ -36,24 +38,26 @@ struct ScriptScreen: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
 
-                // 👉 Script alanı tüm kalan yüksekliği kaplar
                 scriptBox
                     .frame(maxHeight: .infinity)
                     .padding(.horizontal, 24)
 
-                continueButton
+                // Buttons remain visible; loading state handled inside scriptBox + disabled here
+                mainActionButton
                     .padding(.horizontal)
 
-                if useAIGeneration { regenerateButton }
-
-                // Alt tarafta ekstra boşluk istemiyorsan Spacer'ı kaldırıyoruz
+                if useAIGeneration && !aiText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    regenerateButton
+                }
             }
         }
-        .ignoresSafeArea(.keyboard) // klavye açılınca taşmayı engelle
+        .ignoresSafeArea(.keyboard)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        }
         .onAppear {
-            if useAIGeneration && viewModel.script.isEmpty {
-                Task { await viewModel.generateScript(for: project.title) }
-            }
+            aiText = viewModel.displayScript
         }
         .onChange(of: viewModel.displayScript) { newValue in
             aiText = newValue
@@ -65,7 +69,7 @@ struct ScriptScreen: View {
         }
     }
 
-    // MARK: - UI Components
+    // MARK: - UI
 
     private var header: some View {
         VStack(spacing: 6) {
@@ -146,55 +150,65 @@ struct ScriptScreen: View {
         }
     }
 
-    private var continueButton: some View {
-        Button(action: {
-            guard !currentScript.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
-            Task { await continueToVoice() }
-        }) {
-            Text("Continue to Voice")
+    private var mainActionButton: some View {
+        Button {
+            if useAIGeneration && aiText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                Task {
+                    guard let pid = project.backendId, !pid.isEmpty else {
+                        viewModel.errorMessage = "This project isn’t linked to the backend yet. Please go back and start a new project."
+                        return
+                    }
+                    await viewModel.generateScript(for: project.title, projectId: pid)
+                }
+            } else {
+                Task { await continueToVoice() }
+            }
+        } label: {
+            Text(mainButtonText)
                 .font(.headline)
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(
-                    LinearGradient(
-                        colors: [
-                            Color("ButtonGradient1"),
-                            Color("ButtonGradient2"),
-                            Color("ButtonGradient3")
-                        ],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                )
-                .clipShape(RoundedRectangle(cornerRadius: 18))
-                .shadow(color: .black.opacity(0.25), radius: 6, x: 0, y: 4)
         }
-        .disabled(currentScript.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isLoading)
+        .background(
+            LinearGradient(
+                colors: [Color("ButtonGradient1"), Color("ButtonGradient2"), Color("ButtonGradient3")],
+                startPoint: .leading, endPoint: .trailing
+            )
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 18))
+        .shadow(color: .black.opacity(0.25), radius: 6, x: 0, y: 4)
+        .disabled(
+            viewModel.isLoading ||
+            (!useAIGeneration && customScriptText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+        )
     }
 
     private var regenerateButton: some View {
         Button {
-            Task { await viewModel.generateScript(for: project.title) }
-        } label: {
-            if !viewModel.isLoading {
-                HStack(spacing: 6) {
-                    Image(systemName: "arrow.clockwise")
-                    Text("Regenerate Script")
+            Task {
+                guard let pid = project.backendId, !pid.isEmpty else {
+                    viewModel.errorMessage = "Missing project link. Please start a new project."
+                    return
                 }
-                .font(.subheadline)
-                .foregroundColor(.white.opacity(0.9))
+                await viewModel.generateScript(for: project.title, projectId: pid)
             }
+        } label: {
+            HStack(spacing: 6) {
+                Image(systemName: "arrow.clockwise")
+                Text("Regenerate Script")
+            }
+            .font(.subheadline)
+            .foregroundColor(.white.opacity(0.9))
         }
+        .disabled(viewModel.isLoading)
         .padding(.top, 4)
+        .padding(.bottom, 8)
     }
 
-    // MARK: - Logic
+    // MARK: - Navigation
 
     private func continueToVoice() async {
-        isLoading = true
-        defer { isLoading = false }
-
         var updatedProject = project
         updatedProject.script = currentScript
         updatedProject.scenes = viewModel.scenes.map {
