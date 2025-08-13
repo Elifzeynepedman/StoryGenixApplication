@@ -11,8 +11,11 @@ import GoogleSignIn
 
 @main
 struct StoryGenixAppApp: App {
-    @State private var hasSeenOnboarding = false
+    // ✅ Use @AppStorage for persistence of onboarding state
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding: Bool = false
     @State private var router = Router()
+    @StateObject private var creditsVM = CreditsViewModel()
+    @StateObject private var projectViewModel = ProjectsViewModel() // Inject ProjectsViewModel here
 
     init() {
         FirebaseApp.configure()
@@ -20,12 +23,17 @@ struct StoryGenixAppApp: App {
 
     var body: some Scene {
         WindowGroup {
-            if hasSeenOnboarding {
-                MainTabView()
-                    .environment(router)
-            } else {
-                OnboardingView(hasSeenOnboarding: $hasSeenOnboarding)
-                    .environment(router)
+            Group {
+                if hasSeenOnboarding {
+                    MainTabView()
+                } else {
+                    OnboardingView(hasSeenOnboarding: $hasSeenOnboarding)
+                }
             }
+            // ✅ Inject environment objects here so they are available to all views
+            .environment(router)
+            .environmentObject(creditsVM)
+            .environmentObject(projectViewModel)
         }
-    }}
+    }
+}

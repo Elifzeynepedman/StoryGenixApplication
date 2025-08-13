@@ -1,0 +1,21 @@
+{
+  "images" : [
+    {
+      "filename" : "Lucid_Origin_A_serene_alien_shoreline_with_crystalblue_waves_g_3.jpg",
+      "idiom" : "universal",
+      "scale" : "1x"
+    },
+    {
+      "idiom" : "universal",
+      "scale" : "2x"
+    },
+    {
+      "idiom" : "universal",
+      "scale" : "3x"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

@@ -13,11 +13,13 @@ import UIKit
 struct ContentView: View {
     @StateObject private var speechRecognizer = SpeechRecognizer()
     @Environment(Router.self) private var router
+    @EnvironmentObject private var creditsVM: CreditsViewModel
 
     @State private var topic: String = ""
     @State private var showEmptyError = false
     @State private var micPulse = false
     @State private var isLoadingSurprise = false
+    @State private var showProPurchase = false
     @FocusState private var isEditorFocused: Bool
 
     let suggestedIdeas = [
@@ -175,11 +177,11 @@ struct ContentView: View {
                         Spacer()
                     }
                     .padding(.bottom, 40)
-                    .frame(width: geo.size.width) // ✅ Lock width to prevent horizontal shift
+                    .frame(width: geo.size.width)
                 }
-                .ignoresSafeArea(.keyboard) // ✅ Prevent screen from moving up
+                .ignoresSafeArea(.keyboard)
                 .contentShape(Rectangle())
-                .onTapGesture { isEditorFocused = false } // ✅ Tap anywhere closes keyboard
+                .onTapGesture { isEditorFocused = false }
             }
             .navigationBarHidden(true)
             .onReceive(speechRecognizer.$transcript) { topic = $0 }
@@ -194,7 +196,6 @@ struct ContentView: View {
                             username: "anonymous"
                         )
                         
-                        // ✅ Add this to print Firebase ID token
                         user.getIDToken { token, error in
                             if let token = token {
                                 print("✅ Firebase ID Token:\n\(token)")
@@ -209,9 +210,46 @@ struct ContentView: View {
                 }
             }
         }
+        .safeAreaInset(edge: .top) {
+            HStack {
+                Spacer()
+                
+                Button(action: {
+                    showProPurchase = true
+                }) {
+                    HStack(spacing: 4) { // Add a small spacing between icon and text
+                        Image(systemName: "crown.fill") // Use a crown symbol for 'PRO'
+                            .font(.caption2)
+                        Text("PRO")
+                            .font(.caption)
+                            .fontWeight(.heavy)
+                    }
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(
+                        LinearGradient(
+                            colors: [
+                                Color(red: 0.78, green: 0.52, blue: 1.0, opacity: 1.0),
+                                Color(red: 1.0, green: 0.65, blue: 0.76, opacity: 1.0)
+                            ],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .clipShape(Capsule()) // Use a capsule shape for a rounded pill look
+                    .foregroundStyle(.white) // Use foregroundStyle for a cleaner look
+                }
+                .padding(.top, 20)
+                .padding(.trailing, 20)
+            }
+        }
+        .sheet(isPresented: $showProPurchase) {
+            ProPurchaseView()
+                .environmentObject(creditsVM)
+        }
     }
 
-    // ✅ Suggestion Button
+    // ... (rest of your helper functions remain unchanged)
     private func suggestionButton(title: String) -> some View {
         Text(title)
             .font(.footnote)

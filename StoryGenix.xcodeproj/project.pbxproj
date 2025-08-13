@@ -42,7 +42,6 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
-				Utilities/Untitled.swift,
 			);
 			target = 8FCDFA3C2E113F540094D0C2 /* StoryGenixApp */;
 		};

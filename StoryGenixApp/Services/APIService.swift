@@ -5,21 +5,24 @@ class ApiService {
 
     #if targetEnvironment(simulator)
     let baseURL = "http://127.0.0.1:5001"
-    
     #else
     let baseURL = "http://192.168.1.247:5001" // ✅ Your LAN IP for physical device
     #endif
 
     private init() {}
 
-    // MARK: - Authenticated Request Helper
+    // MARK: - Authenticated Request Helper (kept private)
     private func authorizedRequest(for url: URL, method: String = "POST") async throws -> URLRequest {
         let token = try await withCheckedThrowingContinuation { continuation in
             AuthManager.shared.getIDToken { token in
                 if let token = token {
                     continuation.resume(returning: token)
                 } else {
-                    continuation.resume(throwing: NSError(domain: "Auth", code: 401, userInfo: [NSLocalizedDescriptionKey: "No Firebase token found"]))
+                    continuation.resume(throwing: NSError(
+                        domain: "Auth",
+                        code: 401,
+                        userInfo: [NSLocalizedDescriptionKey: "No Firebase token found"]
+                    ))
                 }
             }
         }
@@ -31,11 +34,21 @@ class ApiService {
         return request
     }
 
+    // MARK: - 🔓 Public wrapper used by other services (CreditsService, etc.)
+    func makeAuthorizedRequest(_ path: String,
+                               method: String = "POST",
+                               body: Data? = nil) async throws -> URLRequest {
+        let url = URL(string: "\(baseURL)\(path)")!
+        var req = try await authorizedRequest(for: url, method: method)
+        if let body { req.httpBody = body }
+        return req
+    }
+
     // MARK: - Create Project
     func createProject(title: String, topic: String) async throws -> VideoProject {
         let url = URL(string: "\(baseURL)/api/projects")!
         var request = try await authorizedRequest(for: url)
-        
+
         let body = ["title": title, "topic": topic]
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
@@ -57,12 +70,12 @@ class ApiService {
             progressStep: ProgressStep(status: response.status)
         )
     }
+
     // MARK: - Fetch Random Topic
     func fetchRandomTopic() async throws -> String {
         guard let url = URL(string: "\(baseURL)/api/script/create_random_topic") else {
             throw URLError(.badURL)
         }
-
         var request = try await authorizedRequest(for: url, method: "GET")
 
         let (data, response) = try await URLSession.shared.data(for: request)
@@ -77,7 +90,6 @@ class ApiService {
         let url = URL(string: "\(baseURL)/api/projects/\(projectId)/script")!
         var request = try await authorizedRequest(for: url)
 
-
         let body = [
             "topic": topic,
             "projectId": projectId
@@ -87,7 +99,6 @@ class ApiService {
         let (data, _) = try await URLSession.shared.data(for: request)
         return try JSONDecoder().decode(ScriptResponseModel.self, from: data)
     }
-
 
     // MARK: - Generate Images
     func generateImages(projectId: String, numImages: Int = 4, aspectRatio: String = "square") async throws -> ImageResponseModel {
@@ -145,7 +156,6 @@ class ApiService {
         return try JSONDecoder().decode(VideoStatusResponse.self, from: data)
     }
 
-    // MARK: - Scene-specific Image Generation
     // MARK: - Scene-specific Image Generation (by Prompt)
     func generateImagesForScene(
         projectId: String,
@@ -154,7 +164,7 @@ class ApiService {
         numImages: Int = 4,
         aspectRatio: String = "square"
     ) async throws -> [String] {
-        let url = URL(string: "\(baseURL)/api/scenes/generate-scene")! // ✅ CORRECTED
+        let url = URL(string: "\(baseURL)/api/scenes/generate-scene")!
         var request = try await authorizedRequest(for: url)
 
         let body: [String: Any] = [
@@ -168,11 +178,10 @@ class ApiService {
 
         let (data, response) = try await URLSession.shared.data(for: request)
         try validateResponse(response, data: data, domain: "ImageSceneAPI")
-        
+
         let result = try JSONDecoder().decode(ImageSceneResponse.self, from: data)
         return result.images.map { "\(baseURL)\($0)" }
     }
-
 
     // MARK: - Response Validator
     private func validateResponse(_ response: URLResponse, data: Data, domain: String) throws {
@@ -185,7 +194,6 @@ class ApiService {
         }
     }
 }
-
 
 // MARK: - Models
 struct ProjectResponseModel: Codable {
