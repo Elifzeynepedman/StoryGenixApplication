@@ -1,3 +1,4 @@
+// ImageScreen.swift
 import SwiftUI
 
 struct ImageScreen: View {
@@ -8,6 +9,7 @@ struct ImageScreen: View {
     @State private var fullscreenImageURL: String?
     @State private var isPromptExpanded = false
 
+    @Environment(\.dismiss) private var dismiss
     @Environment(Router.self) private var router
     @EnvironmentObject private var projectViewModel: ProjectsViewModel
 
@@ -15,7 +17,7 @@ struct ImageScreen: View {
         switch viewModel.selectedAspect {
         case "16:9": return 16.0 / 9.0
         case "9:16": return 9.0 / 16.0
-        default: return 1.0
+        default:     return 1.0
         }
     }
 
@@ -25,6 +27,7 @@ struct ImageScreen: View {
 
             VStack(spacing: 20) {
                 header
+
                 SegmentedToggle(options: viewModel.aspectOptions, selected: $viewModel.selectedAspect)
                     .padding(.horizontal, 20)
 
@@ -32,7 +35,7 @@ struct ImageScreen: View {
                     if let currentScene = currentScene {
                         sceneCard(currentScene)
                     } else {
-                        loadingState
+                        emptyState
                     }
                 }
                 .padding(.horizontal)
@@ -42,12 +45,17 @@ struct ImageScreen: View {
             if let url = fullscreenImageURL { fullscreenViewer(url: url) }
             if isPromptExpanded { promptModal }
         }
-        .onAppear { viewModel.loadFromScenes(project.scenes) }
+        .onAppear {
+            // Hydrate from the project we navigated with
+            if viewModel.scenes.isEmpty {
+                viewModel.loadFromScenes(project.scenes)
+            }
+        }
         .onChange(of: viewModel.selectedAspect) { _ in clearCurrentSceneImages() }
         .safeAreaInset(edge: .bottom) { footerControls }
     }
 
-    // MARK: - UI Components
+    // MARK: - UI
 
     private var header: some View {
         VStack(spacing: 6) {
@@ -58,10 +66,26 @@ struct ImageScreen: View {
         .padding(.top, 20)
     }
 
-    private var loadingState: some View {
-        VStack(spacing: 12) {
-            ProgressView()
-            Text("Loading scenes…").foregroundColor(.white.opacity(0.8))
+    private var emptyState: some View {
+        VStack(spacing: 10) {
+            Text("No scenes found")
+                .foregroundColor(.white)
+                .font(.headline)
+            Text("Go back to Script and add a script to generate images.")
+                .multilineTextAlignment(.center)
+                .foregroundColor(.white.opacity(0.8))
+                .font(.subheadline)
+            Button {
+                dismiss()
+            } label: {
+                Text("Back to Script")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 16).padding(.vertical, 10)
+                    .background(Color.white.opacity(0.2))
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+            }
+            .padding(.top, 6)
         }
         .frame(maxWidth: .infinity, minHeight: 220)
     }
@@ -111,7 +135,6 @@ struct ImageScreen: View {
             .transition(.opacity)
         }
     }
-
 
     private var promptModal: some View {
         ZStack {
@@ -249,19 +272,22 @@ struct ImageScreen: View {
         .padding(.top, 10)
     }
 
+    // MARK: - Footer (hidden until images exist)
 
     private var footerControls: some View {
         Group {
-            if let currentScene = currentScene {
+            if let currentScene = currentScene, !currentScene.generatedImages.isEmpty {
                 navigationControls(for: currentScene)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 10)
                     .background(.ultraThinMaterial)
+                    .transition(.opacity)
             }
         }
     }
 
     // MARK: - Helpers
+
     private func navigationControls(for currentScene: ImageScene) -> some View {
         HStack(spacing: 16) {
             Button {
@@ -279,8 +305,7 @@ struct ImageScreen: View {
             if viewModel.currentSceneIndex < viewModel.scenes.count - 1 {
                 Button {
                     guard !(currentScene.generatedImages.isEmpty || currentScene.selectedImage == nil) else {
-                        showWarning()
-                        return
+                        showWarning(); return
                     }
                     viewModel.currentSceneIndex += 1
                 } label: {
@@ -291,19 +316,17 @@ struct ImageScreen: View {
             } else {
                 PrimaryGradientButton(title: "Continue to Video", isLoading: false) {
                     guard !(currentScene.generatedImages.isEmpty || currentScene.selectedImage == nil) else {
-                        showWarning()
-                        return
+                        showWarning(); return
                     }
 
                     var updated = project
                     updated.progressStep = .video
                     updated.selectedImageIndices = viewModel.selectedImageIndices.enumerated()
                         .reduce(into: [:]) { dict, tuple in
-                            if let selectedIndex = tuple.element {
-                                dict[tuple.offset] = selectedIndex
-                            }
+                            if let selectedIndex = tuple.element { dict[tuple.offset] = selectedIndex }
                         }
                     updated.currentSceneIndex = viewModel.currentSceneIndex
+
                     projectViewModel.upsertAndNavigate(updated) {
                         router.goToVideoPreview(project: $0)
                     }

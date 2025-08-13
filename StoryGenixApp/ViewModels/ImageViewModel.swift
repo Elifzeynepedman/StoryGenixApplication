@@ -1,10 +1,4 @@
-//
-//  ImageViewModel.swift
-//  StoryGenixApp
-//
-//  Created by Elif Edman on 29.06.2025.
-//
-
+// ImageViewModel.swift
 import Foundation
 
 @MainActor
@@ -20,9 +14,10 @@ final class ImageViewModel: ObservableObject {
     @Published var selectedImageIndices: [Int?] = []
 
     func loadFromScenes(_ videoScenes: [VideoScene]) {
-        scenes = videoScenes.map { ImageScene(sceneText: $0.sceneText, prompt: $0.prompt) }
-        selectedImageIndices = Array(repeating: nil, count: scenes.count)
-        currentSceneIndex = 0
+        // Map exactly what came from Script/Voice → keep text & prompt
+        self.scenes = videoScenes.map { ImageScene(sceneText: $0.sceneText, prompt: $0.prompt) }
+        self.selectedImageIndices = Array(repeating: nil, count: scenes.count)
+        self.currentSceneIndex = 0
     }
 
     func updatePrompt(for index: Int, newPrompt: String) {
@@ -56,7 +51,6 @@ final class ImageViewModel: ObservableObject {
         Task {
             defer { isSceneLoading[currentSceneIndex] = false }
             do {
-                // ImageViewModel.generateImagesForCurrentScene(...)
                 let images = try await ApiService.shared.generateImagesForScene(
                     projectId: projectId,
                     sceneIndex: currentSceneIndex,
@@ -65,14 +59,14 @@ final class ImageViewModel: ObservableObject {
                     aspectRatio: aspect
                 )
 
+                // Normalize to 4 slots for the grid
                 var normalized = images
                 if normalized.count < 4, let last = normalized.last {
                     normalized.append(contentsOf: Array(repeating: last, count: 4 - normalized.count))
                 }
 
-                // ✅ use normalized, not images
-                scenes[currentSceneIndex].generatedImages = normalized
-                scenes[currentSceneIndex].selectedImage = nil
+                self.scenes[self.currentSceneIndex].generatedImages = normalized
+                self.scenes[self.currentSceneIndex].selectedImage = nil
 
             } catch {
                 print("❌ Error generating images for scene \(currentSceneIndex): \(error)")

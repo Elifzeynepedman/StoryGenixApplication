@@ -7,6 +7,8 @@ struct ScriptScreen: View {
     @State private var customScriptText = ""
     @StateObject private var viewModel = ScriptLogicViewModel()
     @State private var aiText: String = ""
+    @State private var isSubmitting = false
+    @State private var errorText: String?
 
     @Environment(Router.self) private var router
     @EnvironmentObject private var projectViewModel: ProjectsViewModel
@@ -42,7 +44,10 @@ struct ScriptScreen: View {
                     .frame(maxHeight: .infinity)
                     .padding(.horizontal, 24)
 
-                // Buttons remain visible; loading state handled inside scriptBox + disabled here
+                if let e = errorText {
+                    Text(e).foregroundColor(.red).font(.footnote)
+                }
+
                 mainActionButton
                     .padding(.horizontal)
 
@@ -53,20 +58,10 @@ struct ScriptScreen: View {
         }
         .ignoresSafeArea(.keyboard)
         .contentShape(Rectangle())
-        .onTapGesture {
-            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-        }
-        .onAppear {
-            aiText = viewModel.displayScript
-        }
-        .onChange(of: viewModel.displayScript) { newValue in
-            aiText = newValue
-        }
-        .onChange(of: mode) { newMode in
-            if newMode == "Auto-Generated" {
-                aiText = viewModel.displayScript
-            }
-        }
+        .onTapGesture { UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil) }
+        .onAppear { aiText = viewModel.displayScript }
+        .onChange(of: viewModel.displayScript) { newValue in aiText = newValue }
+        .onChange(of: mode) { newMode in if newMode == "Auto-Generated" { aiText = viewModel.displayScript } }
     }
 
     // MARK: - UI
@@ -92,34 +87,23 @@ struct ScriptScreen: View {
                 .fill(Color.black.opacity(0.3))
                 .overlay(
                     LinearGradient(
-                        colors: [
-                            Color("BackgroundGradientDark").opacity(0.15),
-                            Color("BackgroundGradientPurple").opacity(0.1)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
+                        colors: [Color("BackgroundGradientDark").opacity(0.15),
+                                 Color("BackgroundGradientPurple").opacity(0.1)],
+                        startPoint: .topLeading, endPoint: .bottomTrailing
                     )
                 )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 18)
-                        .stroke(Color.white.opacity(0.15), lineWidth: 1)
-                )
+                .overlay(RoundedRectangle(cornerRadius: 18).stroke(Color.white.opacity(0.15), lineWidth: 1))
 
-            if viewModel.isLoading {
+            if viewModel.isLoading || isSubmitting {
                 VStack(spacing: 12) {
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                        .scaleEffect(1.2)
-                    Text("Generating script...")
+                    ProgressView().progressViewStyle(CircularProgressViewStyle(tint: .white)).scaleEffect(1.2)
+                    Text(useAIGeneration ? "Generating script..." : "Structuring your script...")
                         .foregroundColor(.white.opacity(0.8))
                         .font(.subheadline)
                 }
                 .padding(16)
             } else if let error = viewModel.errorMessage {
-                Text(error)
-                    .foregroundColor(.red)
-                    .font(.system(size: 16))
-                    .padding(16)
+                Text(error).foregroundColor(.red).font(.system(size: 16)).padding(16)
             } else if useAIGeneration {
                 TextEditor(text: $aiText)
                     .scrollContentBackground(.hidden)
@@ -129,8 +113,7 @@ struct ScriptScreen: View {
                         if aiText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                             Text("Edit your AI-generated script…")
                                 .foregroundColor(.white.opacity(0.6))
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 14)
+                                .padding(.horizontal, 12).padding(.vertical, 14)
                         }
                     }
             } else {
@@ -140,10 +123,9 @@ struct ScriptScreen: View {
                     .padding(12)
                     .overlay(alignment: .topLeading) {
                         if customScriptText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                            Text("Write your script here...")
+                            Text("Write your script here…")
                                 .foregroundColor(.white.opacity(0.6))
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 14)
+                                .padding(.horizontal, 12).padding(.vertical, 14)
                         }
                     }
             }
@@ -152,34 +134,18 @@ struct ScriptScreen: View {
 
     private var mainActionButton: some View {
         Button {
-            if useAIGeneration && aiText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                Task {
-                    guard let pid = project.backendId, !pid.isEmpty else {
-                        viewModel.errorMessage = "This project isn’t linked to the backend yet. Please go back and start a new project."
-                        return
-                    }
-                    await viewModel.generateScript(for: project.title, projectId: pid)
-                }
-            } else {
-                Task { await continueToVoice() }
-            }
+            Task { await primaryActionTapped() }
         } label: {
             Text(mainButtonText)
-                .font(.headline)
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding()
+                .font(.headline).foregroundColor(.white)
+                .frame(maxWidth: .infinity).padding()
         }
-        .background(
-            LinearGradient(
-                colors: [Color("ButtonGradient1"), Color("ButtonGradient2"), Color("ButtonGradient3")],
-                startPoint: .leading, endPoint: .trailing
-            )
-        )
+        .background(LinearGradient(colors: [Color("ButtonGradient1"), Color("ButtonGradient2"), Color("ButtonGradient3")],
+                                   startPoint: .leading, endPoint: .trailing))
         .clipShape(RoundedRectangle(cornerRadius: 18))
         .shadow(color: .black.opacity(0.25), radius: 6, x: 0, y: 4)
         .disabled(
-            viewModel.isLoading ||
+            viewModel.isLoading || isSubmitting ||
             (!useAIGeneration && customScriptText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
         )
     }
@@ -194,26 +160,55 @@ struct ScriptScreen: View {
                 await viewModel.generateScript(for: project.title, projectId: pid)
             }
         } label: {
-            HStack(spacing: 6) {
-                Image(systemName: "arrow.clockwise")
-                Text("Regenerate Script")
-            }
-            .font(.subheadline)
-            .foregroundColor(.white.opacity(0.9))
+            HStack(spacing: 6) { Image(systemName: "arrow.clockwise"); Text("Regenerate Script") }
+                .font(.subheadline).foregroundColor(.white.opacity(0.9))
         }
         .disabled(viewModel.isLoading)
-        .padding(.top, 4)
-        .padding(.bottom, 8)
+        .padding(.top, 4).padding(.bottom, 8)
     }
 
-    // MARK: - Navigation
+    // MARK: - Actions
+
+    private func primaryActionTapped() async {
+        errorText = nil
+        if useAIGeneration && aiText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            // Generate script from topic via your existing viewModel flow
+            guard let pid = project.backendId, !pid.isEmpty else {
+                errorText = "This project isn’t linked to the backend yet. Please go back and start a new project."
+                return
+            }
+            await viewModel.generateScript(for: project.title, projectId: pid)
+        } else {
+            await continueToVoice()
+        }
+    }
 
     private func continueToVoice() async {
+        guard let pid = project.backendId, !pid.isEmpty else {
+            errorText = "Missing project link. Please start a new project."; return
+        }
+
         var updatedProject = project
         updatedProject.script = currentScript
-        updatedProject.scenes = viewModel.scenes.map {
-            VideoScene(sceneText: $0.text, prompt: $0.imagePrompt)
+
+        if useAIGeneration {
+            // scenes came from LLM → viewModel.scenes already set
+            updatedProject.scenes = viewModel.scenes.map {
+                VideoScene(sceneText: $0.text, prompt: $0.imagePrompt)
+            }
+        } else {
+            // Write My Own → call backend to structure + promptify
+            isSubmitting = true
+            defer { isSubmitting = false }
+            do {
+                let resp = try await ApiService.shared.createCustomScript(projectId: pid, scriptText: currentScript)
+                updatedProject.scenes = resp.scenes.map { VideoScene(sceneText: $0.text, prompt: $0.imagePrompt) }
+            } catch {
+                errorText = error.localizedDescription
+                return
+            }
         }
+
         updatedProject.progressStep = .voice
 
         projectViewModel.upsertAndNavigate(updatedProject) {
